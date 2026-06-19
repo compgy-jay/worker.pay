@@ -601,36 +601,36 @@ export default function Home() {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-100 text-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 text-slate-900">
       {notice && (
-        <div className={`notice ${notice.type === "success" ? "notice-success" : "notice-error"}`}>
+        <div className={`fixed top-4 right-4 z-50 rounded-lg px-4 py-3 text-sm font-medium shadow-lg ${notice.type === "success" ? "bg-emerald-500 text-white" : "bg-rose-500 text-white"}`}>
           {notice.message}
         </div>
       )}
 
-      <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-5 md:px-6">
+      <div className="border-b border-blue-200/30 bg-white/50 backdrop-blur-sm">
+        <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-6 md:px-6">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">Project cost control</p>
-              <h1 className="mt-1 text-2xl font-semibold text-slate-950 md:text-3xl">
-                {settings?.project_name || "House Project Manager"}
+              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-blue-600">Project Management</p>
+              <h1 className="mt-1 text-2xl font-bold text-slate-900 md:text-3xl">
+                {settings?.project_name || "Project Overview"}
               </h1>
               <p className="mt-1 text-sm text-slate-600">
-                {settings?.foreman_name ? `Foreman: ${settings.foreman_name}` : "Track wages, materials, and budget in one place."}
+                {settings?.pm_name ? `Project Manager: ${settings.pm_name}` : "Manage your project teams, resources, and budget"}
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
               <button className="secondary-button" onClick={() => window.print()}>
-                Print Report
+                📄 Print Report
               </button>
               <button className="primary-button" onClick={() => setTab("wages")}>
-                Record Wage
+                ➕ Record Labor Cost
               </button>
             </div>
           </div>
 
-          <nav className="flex gap-1 overflow-x-auto border-b border-slate-200">
+          <nav className="flex gap-1 overflow-x-auto border-t border-blue-200/30 pt-4">
             {tabs.map((item) => (
               <button
                 key={item.key}
@@ -642,37 +642,37 @@ export default function Home() {
             ))}
           </nav>
         </div>
-      </header>
+      </div>
 
-      <main className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-6 md:px-6">
+      <main className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-8 md:px-6">
         {booting ? (
-          <div className="panel p-8 text-center text-slate-600">Loading project ledger...</div>
+          <div className="rounded-lg border border-blue-200 bg-blue-50 p-8 text-center text-blue-700">⏳ Loading project data...</div>
         ) : (
           <>
             {tab === "dashboard" && (
               <section className="flex flex-col gap-6">
-                <SectionTitle eyebrow="Overview" title="Project health" />
+                <SectionTitle eyebrow="Dashboard" title="Project Health & Metrics" />
 
                 <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-                  <MetricCard label="Grand Total" value={money(summary.grandTotal)} detail="Wages plus material costs" tone="blue" />
-                  <MetricCard label="Unpaid Wages" value={money(summary.unpaidTotal)} detail={`${summary.unpaidRecordCount} open wage record(s)`} tone="red" />
-                  <MetricCard label="Materials" value={money(summary.materialTotal)} detail={`${summary.materialCount} material entry(s)`} tone="amber" />
-                  <MetricCard label="Workers" value={String(summary.workerCount)} detail={`${departments.length || 0} department(s)`} tone="green" />
+                  <MetricCard label="Total Spend" value={money(summary.grandTotal)} detail="Labor + Materials" tone="blue" />
+                  <MetricCard label="Outstanding Labor" value={money(summary.unpaidTotal)} detail={`${summary.unpaidRecordCount} pending`} tone="red" />
+                  <MetricCard label="Material Cost" value={money(summary.materialTotal)} detail={`${summary.materialCount} items`} tone="amber" />
+                  <MetricCard label="Team Size" value={String(summary.workerCount)} detail={`${departments.length || 0} department(s)`} tone="green" />
                 </div>
 
                 <div className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
                   <div className="panel p-5">
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <div>
-                        <h3 className="text-lg font-semibold text-slate-950">Budget progress</h3>
+                        <h3 className="text-lg font-semibold text-slate-950">Budget Overview</h3>
                         <p className="text-sm text-slate-600">
                           {summary.budget > 0
-                            ? `${money(summary.budgetRemaining)} remaining from ${money(summary.budget)}`
-                            : "Set a project budget in Settings to track burn rate."}
+                            ? `${money(summary.budgetRemaining)} of ${money(summary.budget)} remaining`
+                            : "Set a budget in Settings to track project spending"}
                         </p>
                       </div>
                       <span className="text-sm font-semibold text-slate-700">
-                        {summary.budget > 0 ? `${summary.budgetUsedPercent.toFixed(1)}% used` : "No budget"}
+                        {summary.budget > 0 ? `${summary.budgetUsedPercent.toFixed(1)}% spent` : "No budget set"}
                       </span>
                     </div>
                     <div className="progress-track mt-4">
@@ -687,30 +687,30 @@ export default function Home() {
                         <p className="mt-1 font-semibold text-emerald-700">{money(summary.paidTotal)}</p>
                       </div>
                       <div className="rounded-md bg-slate-50 p-3">
-                        <p className="text-xs uppercase tracking-[0.12em] text-slate-500">Unpaid</p>
+                        <p className="text-xs uppercase tracking-[0.12em] text-slate-500">Pending</p>
                         <p className="mt-1 font-semibold text-rose-700">{money(summary.unpaidTotal)}</p>
                       </div>
                       <div className="rounded-md bg-slate-50 p-3">
-                        <p className="text-xs uppercase tracking-[0.12em] text-slate-500">Records</p>
+                        <p className="text-xs uppercase tracking-[0.12em] text-slate-500">Total Items</p>
                         <p className="mt-1 font-semibold text-slate-900">{summary.recordCount + summary.materialCount}</p>
                       </div>
                     </div>
                   </div>
 
                   <div className="panel p-5">
-                    <h3 className="text-lg font-semibold text-slate-950">Quick actions</h3>
+                    <h3 className="text-lg font-semibold text-slate-950">Quick Actions</h3>
                     <div className="mt-4 grid gap-2">
                       <button className="secondary-button justify-between" onClick={() => setTab("workers")}>
-                        Register or edit workers
-                        <span>{workers.length}</span>
+                        <span>Manage Team</span>
+                        <span className="rounded bg-slate-100 px-2 py-1 text-xs font-semibold">{workers.length}</span>
                       </button>
                       <button className="secondary-button justify-between" onClick={() => setTab("materials")}>
-                        Add material expense
-                        <span>{materials.length}</span>
+                        <span>Record Material</span>
+                        <span className="rounded bg-slate-100 px-2 py-1 text-xs font-semibold">{materials.length}</span>
                       </button>
                       <button className="secondary-button justify-between" onClick={() => setTab("settings")}>
-                        Update budget/settings
-                        <span>{currency}</span>
+                        <span>Update Settings</span>
+                        <span className="rounded bg-slate-100 px-2 py-1 text-xs font-semibold">{currency}</span>
                       </button>
                     </div>
                   </div>
@@ -719,7 +719,7 @@ export default function Home() {
                 <div className="grid gap-4 lg:grid-cols-2">
                   <div className="panel p-5">
                     <div className="flex items-center justify-between gap-3">
-                      <h3 className="text-lg font-semibold text-slate-950">Open wage follow-up</h3>
+                      <h3 className="text-lg font-semibold text-slate-950">Pending Labor Costs</h3>
                       <button className="text-button" onClick={() => setTab("wages")}>View all</button>
                     </div>
                     <div className="mt-4 flex flex-col gap-2">
@@ -735,13 +735,13 @@ export default function Home() {
                           </div>
                         </div>
                       ))}
-                      {unpaidRecords.length === 0 && <EmptyState title="No unpaid wages" detail="Nice. Every visible wage record is settled." />}
+                      {unpaidRecords.length === 0 && <EmptyState title="All labor costs settled" detail="Great! No pending payments." />}
                     </div>
                   </div>
 
                   <div className="panel p-5">
                     <div className="flex items-center justify-between gap-3">
-                      <h3 className="text-lg font-semibold text-slate-950">Recent material spend</h3>
+                      <h3 className="text-lg font-semibold text-slate-950">Recent Material Spend</h3>
                       <button className="text-button" onClick={() => setTab("materials")}>View all</button>
                     </div>
                     <div className="mt-4 flex flex-col gap-2">
@@ -756,7 +756,7 @@ export default function Home() {
                           <p className="font-semibold text-slate-900">{money(material.cost)}</p>
                         </div>
                       ))}
-                      {materials.length === 0 && <EmptyState title="No material costs" detail="Add materials as purchases happen." />}
+                      {materials.length === 0 && <EmptyState title="No materials recorded" detail="Add material costs as they occur." />}
                     </div>
                   </div>
                 </div>
@@ -765,7 +765,7 @@ export default function Home() {
 
             {tab === "workers" && (
               <section className="flex flex-col gap-5">
-                <SectionTitle eyebrow="People" title="Worker register" />
+                <SectionTitle eyebrow="Team Management" title="Team Members" />
 
                 <div className="panel p-5">
                   <div className="grid gap-3 md:grid-cols-[1fr_1fr_1fr_auto]">
@@ -783,11 +783,11 @@ export default function Home() {
                     />
                     <input
                       className="control"
-                      placeholder="Department"
+                      placeholder="Department/Role"
                       value={workerDraft.department}
                       onChange={(event) => setWorkerDraft((current) => ({ ...current, department: event.target.value }))}
                     />
-                    <button className="primary-button" onClick={addWorker}>Register</button>
+                    <button className="primary-button" onClick={addWorker}>Add Member</button>
                   </div>
                 </div>
 
@@ -864,36 +864,36 @@ export default function Home() {
             {tab === "wages" && (
               <section className="flex flex-col gap-5">
                 <SectionTitle
-                  eyebrow="Payroll"
-                  title="Wage ledger"
-                  action={<button className="secondary-button" onClick={exportWages}>Export CSV</button>}
+                  eyebrow="Labor Costs"
+                  title="Wage Records & Payments"
+                  action={<button className="secondary-button" onClick={exportWages}>📥 Export CSV</button>}
                 />
 
                 <div className="panel p-5">
                   <div className="grid gap-3 lg:grid-cols-[1.2fr_0.8fr_0.8fr_auto]">
                     <select className="control" value={salaryWorkerId} onChange={(event) => setSalaryWorkerId(event.target.value)}>
-                      <option value="">Select worker</option>
+                      <option value="">Select team member</option>
                       {workers.map((worker) => (
                         <option key={worker.id} value={worker.id}>{worker.name}</option>
                       ))}
                     </select>
                     <input className="control" type="date" value={salaryWeekStart} onChange={(event) => setSalaryWeekStart(event.target.value)} />
-                    <input className="control" type="number" min="0" step="0.01" placeholder="Weekly pay" value={salaryAmount} onChange={(event) => setSalaryAmount(event.target.value)} />
-                    <button className="primary-button" onClick={addSalaryRecord}>Record</button>
+                    <input className="control" type="number" min="0" step="0.01" placeholder="Labor cost" value={salaryAmount} onChange={(event) => setSalaryAmount(event.target.value)} />
+                    <button className="primary-button" onClick={addSalaryRecord}>Add Cost</button>
                   </div>
                 </div>
 
                 <div className="filter-bar">
-                  <input className="control min-w-0 flex-1" placeholder="Search worker, phone, department" value={salaryFilters.query} onChange={(event) => setSalaryFilters((current) => ({ ...current, query: event.target.value }))} />
+                  <input className="control min-w-0 flex-1" placeholder="Search by name, phone, department" value={salaryFilters.query} onChange={(event) => setSalaryFilters((current) => ({ ...current, query: event.target.value }))} />
                   <select className="control" value={salaryFilters.workerId} onChange={(event) => setSalaryFilters((current) => ({ ...current, workerId: event.target.value }))}>
-                    <option value="">All workers</option>
+                    <option value="">All team members</option>
                     {workers.map((worker) => (
                       <option key={worker.id} value={worker.id}>{worker.name}</option>
                     ))}
                   </select>
                   <select className="control" value={salaryFilters.status} onChange={(event) => setSalaryFilters((current) => ({ ...current, status: event.target.value as SalaryFilters["status"] }))}>
                     <option value="all">All statuses</option>
-                    <option value="unpaid">Unpaid</option>
+                    <option value="unpaid">Pending</option>
                     <option value="paid">Paid</option>
                   </select>
                   <input className="control" type="date" value={salaryFilters.from} onChange={(event) => setSalaryFilters((current) => ({ ...current, from: event.target.value }))} />
@@ -902,9 +902,9 @@ export default function Home() {
                 </div>
 
                 <div className="grid gap-3 md:grid-cols-3">
-                  <MetricCard label="Visible wages" value={money(visibleWageTotal)} detail={`${salaryRecords.length} record(s)`} tone="blue" />
-                  <MetricCard label="Open in view" value={money(unpaidRecords.reduce((total, record) => total + record.amount, 0))} detail={`${unpaidRecords.length} unpaid record(s)`} tone="red" />
-                  <MetricCard label="Project unpaid" value={money(summary.unpaidTotal)} detail="Across all filters" tone="amber" />
+                  <MetricCard label="Visible Costs" value={money(visibleWageTotal)} detail={`${salaryRecords.length} entry(s)`} tone="blue" />
+                  <MetricCard label="Pending in View" value={money(unpaidRecords.reduce((total, record) => total + record.amount, 0))} detail={`${unpaidRecords.length} pending`} tone="red" />
+                  <MetricCard label="Project Pending" value={money(summary.unpaidTotal)} detail="All records" tone="amber" />
                 </div>
 
                 <div className="panel table-shell">
@@ -980,29 +980,29 @@ export default function Home() {
             {tab === "materials" && (
               <section className="flex flex-col gap-5">
                 <SectionTitle
-                  eyebrow="Procurement"
-                  title="Materials ledger"
-                  action={<button className="secondary-button" onClick={exportMaterials}>Export CSV</button>}
+                  eyebrow="Resource Costs"
+                  title="Material & Supply Tracking"
+                  action={<button className="secondary-button" onClick={exportMaterials}>📥 Export CSV</button>}
                 />
 
                 <div className="panel p-5">
                   <div className="grid gap-3 lg:grid-cols-[1.2fr_0.5fr_0.5fr_0.7fr_0.8fr_0.8fr_auto]">
-                    <input className="control" placeholder="Material" value={materialDraft.name} onChange={(event) => setMaterialDraft((current) => ({ ...current, name: event.target.value }))} />
+                    <input className="control" placeholder="Item/Material name" value={materialDraft.name} onChange={(event) => setMaterialDraft((current) => ({ ...current, name: event.target.value }))} />
                     <input className="control" type="number" min="0" step="0.01" placeholder="Qty" value={materialDraft.quantity} onChange={(event) => setMaterialDraft((current) => ({ ...current, quantity: event.target.value }))} />
                     <input className="control" placeholder="Unit" value={materialDraft.unit} onChange={(event) => setMaterialDraft((current) => ({ ...current, unit: event.target.value }))} />
                     <input className="control" type="number" min="0" step="0.01" placeholder="Cost" value={materialDraft.cost} onChange={(event) => setMaterialDraft((current) => ({ ...current, cost: event.target.value }))} />
                     <input className="control" placeholder="Category" value={materialDraft.category} onChange={(event) => setMaterialDraft((current) => ({ ...current, category: event.target.value }))} />
                     <input className="control" type="date" value={materialDraft.date} onChange={(event) => setMaterialDraft((current) => ({ ...current, date: event.target.value }))} />
-                    <button className="primary-button" onClick={addMaterial}>Add</button>
+                    <button className="primary-button" onClick={addMaterial}>Add Item</button>
                   </div>
                   <div className="mt-3 grid gap-3 md:grid-cols-2">
-                    <input className="control" placeholder="Supplier" value={materialDraft.supplier} onChange={(event) => setMaterialDraft((current) => ({ ...current, supplier: event.target.value }))} />
+                    <input className="control" placeholder="Vendor/Supplier" value={materialDraft.supplier} onChange={(event) => setMaterialDraft((current) => ({ ...current, supplier: event.target.value }))} />
                     <input className="control" placeholder="Notes" value={materialDraft.notes} onChange={(event) => setMaterialDraft((current) => ({ ...current, notes: event.target.value }))} />
                   </div>
                 </div>
 
                 <div className="filter-bar">
-                  <input className="control min-w-0 flex-1" placeholder="Search material, supplier, notes" value={materialFilters.query} onChange={(event) => setMaterialFilters((current) => ({ ...current, query: event.target.value }))} />
+                  <input className="control min-w-0 flex-1" placeholder="Search item, vendor, notes" value={materialFilters.query} onChange={(event) => setMaterialFilters((current) => ({ ...current, query: event.target.value }))} />
                   <select className="control" value={materialFilters.category} onChange={(event) => setMaterialFilters((current) => ({ ...current, category: event.target.value }))}>
                     <option value="">All categories</option>
                     {materialCategories.map((category) => (
@@ -1015,9 +1015,9 @@ export default function Home() {
                 </div>
 
                 <div className="grid gap-3 md:grid-cols-3">
-                  <MetricCard label="Visible spend" value={money(visibleMaterialTotal)} detail={`${materials.length} entry(s)`} tone="amber" />
-                  <MetricCard label="Project spend" value={money(summary.materialTotal)} detail="All material costs" tone="blue" />
-                  <MetricCard label="Categories" value={String(materialCategories.length)} detail="Visible material groups" tone="green" />
+                  <MetricCard label="Visible Spend" value={money(visibleMaterialTotal)} detail={`${materials.length} items`} tone="amber" />
+                  <MetricCard label="Project Spend" value={money(summary.materialTotal)} detail="All materials" tone="blue" />
+                  <MetricCard label="Categories" value={String(materialCategories.length)} detail="Categories in use" tone="green" />
                 </div>
 
                 <div className="panel table-shell">
@@ -1104,44 +1104,47 @@ export default function Home() {
 
             {tab === "settings" && (
               <section className="flex flex-col gap-5">
-                <SectionTitle eyebrow="Project" title="Settings and reporting" />
+                <SectionTitle eyebrow="Configuration" title="Project Settings & Reports" />
 
                 <div className="panel p-5">
                   <div className="grid gap-4 md:grid-cols-2">
                     <label className="field-label">
-                      Project name
+                      Project Name
                       <input className="control" value={settingsDraft.project_name} onChange={(event) => setSettingsDraft((current) => ({ ...current, project_name: event.target.value }))} />
                     </label>
                     <label className="field-label">
-                      Currency
+                      Currency Code
                       <input className="control uppercase" maxLength={3} value={settingsDraft.currency} onChange={(event) => setSettingsDraft((current) => ({ ...current, currency: event.target.value.toUpperCase() }))} />
                     </label>
                     <label className="field-label">
-                      Project budget
+                      Total Budget
                       <input className="control" type="number" min="0" step="0.01" value={settingsDraft.budget} onChange={(event) => setSettingsDraft((current) => ({ ...current, budget: event.target.value }))} />
                     </label>
                     <label className="field-label">
-                      Project manager
+                      Project Manager Name
                       <input className="control" value={settingsDraft.pm_name} onChange={(event) => setSettingsDraft((current) => ({ ...current, pm_name: event.target.value }))} />
                     </label>
                     <label className="field-label">
-                      Project manager phone
+                      Project Manager Contact
                       <input className="control" value={settingsDraft.pm_contact} onChange={(event) => setSettingsDraft((current) => ({ ...current, pm_contact: event.target.value }))} />
                     </label>
                     <label className="field-label">
-                      Foreman
+                      Site Foreman/Supervisor
                       <input className="control" value={settingsDraft.foreman_name} onChange={(event) => setSettingsDraft((current) => ({ ...current, foreman_name: event.target.value }))} />
                     </label>
                     <label className="field-label">
-                      Foreman phone
+                      Foreman Contact
                       <input className="control" value={settingsDraft.foreman_contact} onChange={(event) => setSettingsDraft((current) => ({ ...current, foreman_contact: event.target.value }))} />
                     </label>
                   </div>
-                  <div className="mt-5 flex flex-wrap gap-2">
-                    <button className="primary-button" onClick={saveSettings}>Save Settings</button>
-                    <button className="secondary-button" onClick={exportWages}>Export Wages</button>
-                    <button className="secondary-button" onClick={exportMaterials}>Export Materials</button>
-                    <button className="secondary-button" onClick={() => window.print()}>Print Report</button>
+                  <div className="mt-6 border-t border-slate-200 pt-5">
+                    <h3 className="text-sm font-semibold text-slate-900 mb-3">Export & Reporting</h3>
+                    <div className="flex flex-wrap gap-2">
+                      <button className="primary-button" onClick={saveSettings}>💾 Save Settings</button>
+                      <button className="secondary-button" onClick={exportWages}>📥 Export Labor Costs (CSV)</button>
+                      <button className="secondary-button" onClick={exportMaterials}>📥 Export Materials (CSV)</button>
+                      <button className="secondary-button" onClick={() => window.print()}>🖨️ Print Report</button>
+                    </div>
                   </div>
                 </div>
               </section>

@@ -1,6 +1,6 @@
 {
-  "name": "worker-pay",
-  "version": "0.1.0",
+  "name": "project-hub",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -27,9 +27,9 @@
     "tailwindcss": "^4",
     "typescript": "^5"
   },
-  "description": "This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).",
+  "description": "ProjectHub - Professional project management and cost tracking system for managing teams, materials, budgets, and project resources.",
   "main": "index.js",
-  "keywords": [],
+  "keywords": ["project-management", "cost-tracking", "team-management", "budget", "construction"],
   "author": "",
   "license": "ISC"
 }
