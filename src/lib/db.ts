@@ -1,10 +1,11 @@
 import Database from "better-sqlite3";
 import path from "path";
 
-const dbPath = path.join(process.cwd(), "data.db");
+const dbPath = process.env.WORKER_PAY_DB_PATH || path.join(process.cwd(), "data.db");
 const db = new Database(dbPath);
 
 db.pragma("journal_mode = WAL");
+db.pragma("foreign_keys = ON");
 
 db.exec(`
   CREATE TABLE IF NOT EXISTS workers (
@@ -31,7 +32,9 @@ db.exec(`
     pm_name TEXT DEFAULT '',
     pm_contact TEXT DEFAULT '',
     foreman_name TEXT DEFAULT '',
-    foreman_contact TEXT DEFAULT ''
+    foreman_contact TEXT DEFAULT '',
+    currency TEXT DEFAULT 'KES',
+    budget REAL DEFAULT 0
   );
 
   INSERT OR IGNORE INTO project_settings (id) VALUES (1);
@@ -43,9 +46,16 @@ db.exec(`
     unit TEXT DEFAULT 'pcs',
     cost REAL NOT NULL DEFAULT 0,
     date TEXT DEFAULT (date('now')),
+    category TEXT DEFAULT '',
+    supplier TEXT DEFAULT '',
     notes TEXT DEFAULT '',
     created_at TEXT DEFAULT (datetime('now'))
   );
+
+  CREATE INDEX IF NOT EXISTS idx_salary_records_worker_id ON salary_records(worker_id);
+  CREATE INDEX IF NOT EXISTS idx_salary_records_status ON salary_records(status);
+  CREATE INDEX IF NOT EXISTS idx_salary_records_week_start ON salary_records(week_start);
+  CREATE INDEX IF NOT EXISTS idx_materials_date ON materials(date);
 `);
 
 try {
@@ -68,5 +78,27 @@ try {
 } catch {
   // column already exists
 }
+try {
+  db.exec("ALTER TABLE project_settings ADD COLUMN currency TEXT DEFAULT 'KES'");
+} catch {
+  // column already exists
+}
+try {
+  db.exec("ALTER TABLE project_settings ADD COLUMN budget REAL DEFAULT 0");
+} catch {
+  // column already exists
+}
+try {
+  db.exec("ALTER TABLE materials ADD COLUMN category TEXT DEFAULT ''");
+} catch {
+  // column already exists
+}
+try {
+  db.exec("ALTER TABLE materials ADD COLUMN supplier TEXT DEFAULT ''");
+} catch {
+  // column already exists
+}
+
+db.exec("CREATE INDEX IF NOT EXISTS idx_materials_category ON materials(category)");
 
 export default db;

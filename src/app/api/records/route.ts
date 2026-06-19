@@ -1,28 +1,78 @@
 import { NextResponse } from "next/server";
 import db from "@/lib/db";
 
+const PAY_STATUSES = new Set(["paid", "unpaid"]);
+
+function parsePositiveId(value: unknown) {
+  const parsed = typeof value === "number" ? value : parseInt(String(value), 10);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : null;
+}
+
+function parseNonNegativeAmount(value: unknown) {
+  const parsed = typeof value === "number" ? value : parseFloat(String(value));
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed : null;
+}
+
+function isValidDate(value: unknown) {
+  return typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value);
+}
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const workerId = searchParams.get("worker_id");
   const status = searchParams.get("status");
+  const from = searchParams.get("from");
+  const to = searchParams.get("to");
+  const query = searchParams.get("q");
 
-  let sql: string;
+  let sql =
+    "SELECT sr.*, w.name as worker_name, w.contact as worker_contact, w.department as worker_department FROM salary_records sr JOIN workers w ON sr.worker_id = w.id";
   let params: (string | number)[];
+  const where: string[] = [];
 
   if (workerId) {
-    sql = "SELECT * FROM salary_records WHERE worker_id = ?";
-    params = [parseInt(workerId)];
+    const parsedWorkerId = parsePositiveId(workerId);
+    if (!parsedWorkerId) {
+      return NextResponse.json({ error: "worker_id must be a positive integer" }, { status: 400 });
+    }
+    where.push("sr.worker_id = ?");
+    params = [parsedWorkerId];
   } else {
-    sql = "SELECT sr.*, w.name as worker_name, w.contact as worker_contact FROM salary_records sr JOIN workers w ON sr.worker_id = w.id";
     params = [];
   }
 
   if (status) {
-    sql += " AND sr.status = ?";
+    if (!PAY_STATUSES.has(status)) {
+      return NextResponse.json({ error: "status must be paid or unpaid" }, { status: 400 });
+    }
+    where.push("sr.status = ?");
     params.push(status);
   }
+  if (from) {
+    if (!isValidDate(from)) {
+      return NextResponse.json({ error: "from must be a YYYY-MM-DD date" }, { status: 400 });
+    }
+    where.push("sr.week_start >= ?");
+    params.push(from);
+  }
+  if (to) {
+    if (!isValidDate(to)) {
+      return NextResponse.json({ error: "to must be a YYYY-MM-DD date" }, { status: 400 });
+    }
+    where.push("sr.week_start <= ?");
+    params.push(to);
+  }
+  if (query) {
+    const like = `%${query.trim()}%`;
+    where.push("(w.name LIKE ? OR w.contact LIKE ? OR w.department LIKE ?)");
+    params.push(like, like, like);
+  }
 
-  sql += " ORDER BY sr.week_start DESC";
+  if (where.length > 0) {
+    sql += ` WHERE ${where.join(" AND ")}`;
+  }
+
+  sql += " ORDER BY sr.week_start DESC, sr.id DESC";
   const records = db.prepare(sql).all(...params);
   return NextResponse.json(records);
 }
@@ -32,18 +82,28 @@ export async function POST(request: Request) {
   if (!worker_id || !week_start || amount == null) {
     return NextResponse.json({ error: "worker_id, week_start, and amount are required" }, { status: 400 });
   }
-  const worker = db.prepare("SELECT id FROM workers WHERE id = ?").get(worker_id);
+  const parsedWorkerId = parsePositiveId(worker_id);
+  if (!parsedWorkerId) {
+    return NextResponse.json({ error: "worker_id must be a positive integer" }, { status: 400 });
+  }
+  if (!isValidDate(week_start)) {
+    return NextResponse.json({ error: "week_start must be a YYYY-MM-DD date" }, { status: 400 });
+  }
+  const worker = db.prepare("SELECT id FROM workers WHERE id = ?").get(parsedWorkerId);
   if (!worker) {
     return NextResponse.json({ error: "Worker not found" }, { status: 404 });
   }
-  const parsedAmount = parseFloat(amount);
-  if (isNaN(parsedAmount)) {
-    return NextResponse.json({ error: "Amount must be a number" }, { status: 400 });
+  const parsedAmount = parseNonNegativeAmount(amount);
+  if (parsedAmount == null) {
+    return NextResponse.json({ error: "Amount must be a non-negative number" }, { status: 400 });
   }
   const payStatus = status || "unpaid";
+  if (!PAY_STATUSES.has(payStatus)) {
+    return NextResponse.json({ error: "status must be paid or unpaid" }, { status: 400 });
+  }
   const result = db
     .prepare("INSERT INTO salary_records (worker_id, week_start, amount, status) VALUES (?, ?, ?, ?)")
-    .run(worker_id, week_start, parsedAmount, payStatus);
+    .run(parsedWorkerId, week_start, parsedAmount, payStatus);
   const record = db.prepare("SELECT * FROM salary_records WHERE id = ?").get(result.lastInsertRowid);
   return NextResponse.json(record, { status: 201 });
 }

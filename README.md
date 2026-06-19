@@ -1,36 +1,41 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Worker Pay
 
-## Getting Started
+Local project cost control for a house build. The app tracks workers, weekly wage records, material purchases, payment status, project budget, and exportable ledgers.
 
-First, run the development server:
+## Features
+
+- Worker register with departments and contact details
+- Weekly wage ledger with paid/unpaid status
+- Material ledger with category, supplier, quantity, unit, cost, and notes
+- Dashboard totals for wages, materials, unpaid wages, workers, and budget use
+- Date range, search, worker, status, and category filters
+- CSV exports for wages and materials
+- Printable project report
+- SQLite persistence through `better-sqlite3`
+
+## Run Locally
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open `http://localhost:3000`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Production Build
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run lint
+npm run build
+npm run start
+```
 
-## Learn More
+## Database
 
-To learn more about Next.js, take a look at the following resources:
+By default, the app stores data in `data.db` in the project directory. For a more durable deployment, set:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+WORKER_PAY_DB_PATH=/absolute/path/to/worker-pay.db
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The local SQLite files are ignored by git. Back up the database file regularly if it contains real payroll or project cost records.
