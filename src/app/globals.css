@@ -1,0 +1,109 @@
+@import "tailwindcss";
+
+:root {
+  --navy: #0d1b2a;
+  --navy-light: #1b2d45;
+  --burgundy: #4a1a1a;
+  --gold: #d4af37;
+  --gold-light: #e8c94a;
+  --parchment: #f5f0e8;
+  --parchment-dark: #e8e0d0;
+  --cream-text: #f0e6d3;
+  --dark-text: #2c1810;
+}
+
+@theme inline {
+  --color-background: var(--navy);
+  --color-foreground: var(--cream-text);
+  --font-serif: var(--font-serif);
+}
+
+body {
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy-light) 50%, var(--burgundy) 100%);
+  color: var(--cream-text);
+  font-family: var(--font-serif), Georgia, "Times New Roman", serif;
+}
+
+/* ── Parallax ──────────────────────────────────── */
+.parallax-section {
+  position: relative;
+  overflow: hidden;
+}
+
+.parallax-bg {
+  background-attachment: fixed;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  will-change: transform;
+  transition: transform 0.1s linear;
+}
+
+@media (max-width: 768px) {
+  .parallax-bg {
+    background-attachment: scroll;
+  }
+}
+
+/* ── Parchment Card ────────────────────────────── */
+.parchment-card {
+  background: var(--parchment);
+  color: var(--dark-text);
+  border-radius: 0.5rem;
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.3),
+    0 2px 4px -2px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+.parchment-card-alt {
+  background: var(--parchment-dark);
+  color: var(--dark-text);
+}
+
+/* ── Gold Accents ──────────────────────────────── */
+.gold-border {
+  border-color: var(--gold);
+}
+
+.gold-text {
+  color: var(--gold);
+}
+
+.gold-bg {
+  background: var(--gold);
+  color: var(--dark-text);
+}
+
+.gold-bg:hover {
+  background: var(--gold-light);
+}
+
+/* ── Inputs on parchment ───────────────────────── */
+.parchment-input {
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid #c9b99a;
+  color: var(--dark-text);
+  font-family: var(--font-serif), Georgia, serif;
+}
+
+.parchment-input:focus {
+  border-color: var(--gold);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.3);
+}
+
+/* ── Tables on parchment ───────────────────────── */
+.parchment-table th {
+  background: var(--navy-light);
+  color: var(--gold);
+  font-weight: 600;
+}
+
+.parchment-table td {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.parchment-table tr:last-child td {
+  border-bottom: none;
+}
