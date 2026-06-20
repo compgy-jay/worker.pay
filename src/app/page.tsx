@@ -2,8 +2,9 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import gsap from "gsap";
-import { useEntranceAnimation } from "@/hooks/useEntranceAnimation";
+import { useEntranceAnimation, useCountUp } from "@/hooks/useEntranceAnimation";
 import { downloadCsv, formatDate, formatMoney, mondayISO, toQueryString, todayISO } from "@/lib/format";
+import DashboardHero from "@/components/DashboardHero";
 import type {
   Material,
   MaterialFilters,
@@ -108,8 +109,8 @@ function SectionTitle({
   return (
     <div className="flex flex-wrap items-end justify-between gap-3">
       <div>
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-giza-muted">{eyebrow}</p>
-        <h2 className="text-xl font-semibold text-ink">{title}</h2>
+        <p className="text-xs font-semibold uppercase tracking-[0.22em] text-amber">{eyebrow}</p>
+        <h2 className="mt-1 text-xl font-semibold text-ink">{title}</h2>
       </div>
       {action}
     </div>
@@ -121,34 +122,48 @@ function MetricCard({
   value,
   detail,
   tone = "slate",
+  countKey,
 }: {
   label: string;
   value: string;
   detail: string;
   tone?: "slate" | "green" | "red" | "amber" | "blue";
+  countKey?: number;
 }) {
   const toneClass = {
-    slate: "border-giza-border",
-    green: "border-emerald-300",
-    red: "border-rose-300",
-    amber: "border-giza-amber/40",
-    blue: "border-giza-border",
+    slate: "border-border-subtle",
+    green: "border-emerald-300/20",
+    red: "border-rose-300/20",
+    amber: "border-amber/30",
+    blue: "border-border-subtle",
   }[tone];
+
+  const numeric = countKey ?? 0;
+  const countRef = useCountUp(numeric);
 
   return (
     <div className={`metric-card ${toneClass}`}>
-      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-giza-muted">{label}</p>
-      <p className="mt-2 text-2xl font-semibold text-ink">{value}</p>
-      <p className="mt-1 text-sm text-giza-muted">{detail}</p>
+      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-ink-muted">{label}</p>
+      <p className="mt-2 text-2xl font-semibold text-ink">
+        {countKey !== undefined ? (
+          <span>
+            {value.replace(/[\d,]+/, "")}
+            <span ref={countRef}>0</span>
+          </span>
+        ) : (
+          value
+        )}
+      </p>
+      <p className="mt-1 text-sm text-ink-muted">{detail}</p>
     </div>
   );
 }
 
 function EmptyState({ title, detail }: { title: string; detail: string }) {
   return (
-    <div className="rounded-md border border-dashed border-giza-border bg-parchment px-4 py-8 text-center">
+    <div className="rounded-lg border border-dashed border-border-subtle bg-bg-surface/50 px-6 py-10 text-center">
       <p className="font-semibold text-ink">{title}</p>
-      <p className="mt-1 text-sm text-giza-muted">{detail}</p>
+      <p className="mt-1 text-sm text-ink-muted">{detail}</p>
     </div>
   );
 }
@@ -614,36 +629,23 @@ export default function Home() {
   ];
 
   return (
-    <div ref={mainRef} className="min-h-screen bg-parchment text-ink">
+    <div ref={mainRef} className="min-h-screen bg-bg-deep text-ink">
       {notice && (
-        <div className={`fixed top-4 right-4 z-50 rounded-lg px-4 py-3 text-sm font-medium shadow-lg ${notice.type === "success" ? "bg-emerald-500 text-white" : "bg-rose-500 text-white"}`}>
+        <div className={`notice ${notice.type === "success" ? "notice-success" : "notice-error"}`}>
           {notice.message}
         </div>
       )}
 
-      <div className="border-b border-giza-border/50 bg-card/80 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-6 md:px-6">
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-giza-amber">Project Management</p>
-              <h1 className="mt-1 text-2xl font-bold text-ink md:text-3xl">
-                {settings?.project_name || "Project Overview"}
-              </h1>
-              <p className="mt-1 text-sm text-giza-muted">
-                {settings?.pm_name ? `Project Manager: ${settings.pm_name}` : "Manage your project teams, resources, and budget"}
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <button className="secondary-button" onClick={() => window.print()}>
-                📄 Print Report
-              </button>
-              <button className="primary-button" onClick={() => setTab("wages")}>
-                ➕ Record Labor Cost
-              </button>
-            </div>
-          </div>
+      <DashboardHero
+        projectName={settings?.project_name || "Project Overview"}
+        pmName={settings?.pm_name || ""}
+        onRecordLabor={() => setTab("wages")}
+        onPrint={() => window.print()}
+      />
 
-          <nav className="flex gap-1 overflow-x-auto border-t border-giza-border/50 pt-4">
+      <div className="border-b border-border-subtle bg-bg-bg-card/50 backdrop-blur-sm">
+        <div className="mx-auto flex max-w-7xl px-6">
+          <nav className="flex gap-1">
             {tabs.map((item) => (
               <button
                 key={item.key}
@@ -659,7 +661,7 @@ export default function Home() {
 
       <main className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-8 md:px-6">
         {booting ? (
-          <div className="rounded-lg border border-giza-amber/30 bg-giza-amber/10 p-8 text-center text-giza-amber">⏳ Loading project data...</div>
+          <div className="rounded-lg border border-amber/20 bg-amber/5 p-8 text-center text-amber">Loading project data...</div>
         ) : (
           <div ref={contentRef}>
             {tab === "dashboard" && (
@@ -667,10 +669,10 @@ export default function Home() {
                 <SectionTitle eyebrow="Dashboard" title="Project Health & Metrics" />
 
                 <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4" data-animate>
-                  <MetricCard label="Total Spend" value={money(summary.grandTotal)} detail="Labor + Materials" tone="blue" />
-                  <MetricCard label="Outstanding Labor" value={money(summary.unpaidTotal)} detail={`${summary.unpaidRecordCount} pending`} tone="red" />
-                  <MetricCard label="Material Cost" value={money(summary.materialTotal)} detail={`${summary.materialCount} items`} tone="amber" />
-                  <MetricCard label="Team Size" value={String(summary.workerCount)} detail={`${departments.length || 0} department(s)`} tone="green" />
+                  <MetricCard label="Total Spend" value={money(summary.grandTotal)} detail="Labor + Materials" tone="blue" countKey={summary.grandTotal} />
+                  <MetricCard label="Outstanding Labor" value={money(summary.unpaidTotal)} detail={`${summary.unpaidRecordCount} pending`} tone="red" countKey={summary.unpaidTotal} />
+                  <MetricCard label="Material Cost" value={money(summary.materialTotal)} detail={`${summary.materialCount} items`} tone="amber" countKey={summary.materialTotal} />
+                  <MetricCard label="Team Size" value={String(summary.workerCount)} detail={`${departments.length || 0} department(s)`} tone="green" countKey={summary.workerCount} />
                 </div>
 
                 <div className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]" data-animate>
@@ -678,13 +680,13 @@ export default function Home() {
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <div>
                         <h3 className="text-lg font-semibold text-ink">Budget Overview</h3>
-                        <p className="text-sm text-giza-muted">
+                        <p className="text-sm text-ink-muted">
                           {summary.budget > 0
                             ? `${money(summary.budgetRemaining)} of ${money(summary.budget)} remaining`
                             : "Set a budget in Settings to track project spending"}
                         </p>
                       </div>
-                      <span className="text-sm font-semibold text-giza-slate">
+                      <span className="text-sm font-semibold text-ink-muted">
                         {summary.budget > 0 ? `${summary.budgetUsedPercent.toFixed(1)}% spent` : "No budget set"}
                       </span>
                     </div>
@@ -695,16 +697,16 @@ export default function Home() {
                       />
                     </div>
                     <div className="mt-5 grid gap-3 sm:grid-cols-3">
-                      <div className="rounded-md bg-parchment p-3">
-                        <p className="text-xs uppercase tracking-[0.12em] text-giza-muted">Paid</p>
-                        <p className="mt-1 font-semibold text-emerald-700">{money(summary.paidTotal)}</p>
+                      <div className="rounded-md bg-bg-deep p-3">
+                        <p className="text-xs uppercase tracking-[0.12em] text-ink-muted">Paid</p>
+                        <p className="mt-1 font-semibold text-emerald-400">{money(summary.paidTotal)}</p>
                       </div>
-                      <div className="rounded-md bg-parchment p-3">
-                        <p className="text-xs uppercase tracking-[0.12em] text-giza-muted">Pending</p>
-                        <p className="mt-1 font-semibold text-rose-700">{money(summary.unpaidTotal)}</p>
+                      <div className="rounded-md bg-bg-deep p-3">
+                        <p className="text-xs uppercase tracking-[0.12em] text-ink-muted">Pending</p>
+                        <p className="mt-1 font-semibold text-rose-400">{money(summary.unpaidTotal)}</p>
                       </div>
-                      <div className="rounded-md bg-parchment p-3">
-                        <p className="text-xs uppercase tracking-[0.12em] text-giza-muted">Total Items</p>
+                      <div className="rounded-md bg-bg-deep p-3">
+                        <p className="text-xs uppercase tracking-[0.12em] text-ink-muted">Total Items</p>
                         <p className="mt-1 font-semibold text-ink">{summary.recordCount + summary.materialCount}</p>
                       </div>
                     </div>
@@ -715,15 +717,15 @@ export default function Home() {
                     <div className="mt-4 grid gap-2">
                       <button className="secondary-button justify-between" onClick={() => setTab("workers")}>
                         <span>Manage Team</span>
-                        <span className="rounded bg-parchment px-2 py-1 text-xs font-semibold">{workers.length}</span>
+                        <span className="rounded bg-bg-deep px-2 py-1 text-xs font-semibold">{workers.length}</span>
                       </button>
                       <button className="secondary-button justify-between" onClick={() => setTab("materials")}>
                         <span>Record Material</span>
-                        <span className="rounded bg-parchment px-2 py-1 text-xs font-semibold">{materials.length}</span>
+                        <span className="rounded bg-bg-deep px-2 py-1 text-xs font-semibold">{materials.length}</span>
                       </button>
                       <button className="secondary-button justify-between" onClick={() => setTab("settings")}>
                         <span>Update Settings</span>
-                        <span className="rounded bg-parchment px-2 py-1 text-xs font-semibold">{currency}</span>
+                        <span className="rounded bg-bg-deep px-2 py-1 text-xs font-semibold">{currency}</span>
                       </button>
                     </div>
                   </div>
@@ -740,10 +742,10 @@ export default function Home() {
                         <div key={record.id} className="ledger-row">
                           <div>
                             <p className="font-medium text-ink">{record.worker_name}</p>
-                            <p className="text-sm text-giza-muted">{formatDate(record.week_start)}</p>
+                            <p className="text-sm text-ink-muted">{formatDate(record.week_start)}</p>
                           </div>
                           <div className="text-right">
-                            <p className="font-semibold text-rose-700">{money(record.amount)}</p>
+                            <p className="font-semibold text-rose-400">{money(record.amount)}</p>
                             <button className="text-button" onClick={() => setRecordStatus(record.id, "paid")}>Mark paid</button>
                           </div>
                         </div>
@@ -762,7 +764,7 @@ export default function Home() {
                         <div key={material.id} className="ledger-row">
                           <div>
                             <p className="font-medium text-ink">{material.name}</p>
-                            <p className="text-sm text-giza-muted">
+                            <p className="text-sm text-ink-muted">
                               {formatDate(material.date)} {material.category ? `- ${material.category}` : ""}
                             </p>
                           </div>
@@ -915,9 +917,9 @@ export default function Home() {
                 </div>
 
                 <div className="grid gap-3 md:grid-cols-3">
-                  <MetricCard label="Visible Costs" value={money(visibleWageTotal)} detail={`${salaryRecords.length} entry(s)`} tone="blue" />
-                  <MetricCard label="Pending in View" value={money(unpaidRecords.reduce((total, record) => total + record.amount, 0))} detail={`${unpaidRecords.length} pending`} tone="red" />
-                  <MetricCard label="Project Pending" value={money(summary.unpaidTotal)} detail="All records" tone="amber" />
+                  <MetricCard label="Visible Costs" value={money(visibleWageTotal)} detail={`${salaryRecords.length} entry(s)`} tone="blue" countKey={visibleWageTotal} />
+                  <MetricCard label="Pending in View" value={money(unpaidRecords.reduce((total, record) => total + record.amount, 0))} detail={`${unpaidRecords.length} pending`} tone="red" countKey={unpaidRecords.reduce((total, record) => total + record.amount, 0)} />
+                  <MetricCard label="Project Pending" value={money(summary.unpaidTotal)} detail="All records" tone="amber" countKey={summary.unpaidTotal} />
                 </div>
 
                 <div className="panel table-shell">
@@ -964,7 +966,7 @@ export default function Home() {
                                   <td>{formatDate(record.week_start)}</td>
                                   <td>
                                     <p className="font-medium text-ink">{record.worker_name}</p>
-                                    {record.worker_department && <p className="text-xs text-giza-muted">{record.worker_department}</p>}
+                                    {record.worker_department && <p className="text-xs text-ink-muted">{record.worker_department}</p>}
                                   </td>
                                   <td>{record.worker_contact || "-"}</td>
                                   <td className="font-semibold text-ink">{money(record.amount)}</td>
@@ -1028,9 +1030,9 @@ export default function Home() {
                 </div>
 
                 <div className="grid gap-3 md:grid-cols-3">
-                  <MetricCard label="Visible Spend" value={money(visibleMaterialTotal)} detail={`${materials.length} items`} tone="amber" />
-                  <MetricCard label="Project Spend" value={money(summary.materialTotal)} detail="All materials" tone="blue" />
-                  <MetricCard label="Categories" value={String(materialCategories.length)} detail="Categories in use" tone="green" />
+                  <MetricCard label="Visible Spend" value={money(visibleMaterialTotal)} detail={`${materials.length} items`} tone="amber" countKey={visibleMaterialTotal} />
+                  <MetricCard label="Project Spend" value={money(summary.materialTotal)} detail="All materials" tone="blue" countKey={summary.materialTotal} />
+                  <MetricCard label="Categories" value={String(materialCategories.length)} detail="Categories in use" tone="green" countKey={materialCategories.length} />
                 </div>
 
                 <div className="panel table-shell">
@@ -1079,7 +1081,7 @@ export default function Home() {
                                   <td>{formatDate(material.date)}</td>
                                   <td>
                                     <p className="font-medium text-ink">{material.name}</p>
-                                    {material.notes && <p className="text-xs text-giza-muted">{material.notes}</p>}
+                                    {material.notes && <p className="text-xs text-ink-muted">{material.notes}</p>}
                                   </td>
                                   <td>{material.category || "-"}</td>
                                   <td>{material.quantity} {material.unit}</td>
@@ -1150,7 +1152,7 @@ export default function Home() {
                       <input className="control" value={settingsDraft.foreman_contact} onChange={(event) => setSettingsDraft((current) => ({ ...current, foreman_contact: event.target.value }))} />
                     </label>
                   </div>
-                  <div className="mt-6 border-t border-giza-border pt-5">
+                  <div className="mt-6 border-t border-border-subtle pt-5">
                     <h3 className="text-sm font-semibold text-ink mb-3">Export & Reporting</h3>
                     <div className="flex flex-wrap gap-2">
                       <button className="primary-button" onClick={saveSettings}>💾 Save Settings</button>

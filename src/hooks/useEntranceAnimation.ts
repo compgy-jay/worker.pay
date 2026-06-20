@@ -19,9 +19,9 @@ export function useEntranceAnimation(deps: unknown[] = []) {
       gsap.to(targets, {
         opacity: 1,
         y: 0,
-        duration: 0.5,
+        duration: 0.6,
         stagger: 0.08,
-        ease: "power2.out",
+        ease: "power3.out",
       });
     }, el);
 
@@ -32,29 +32,32 @@ export function useEntranceAnimation(deps: unknown[] = []) {
   return ref;
 }
 
-export function useProgressAnimation(
+export function useCountUp(
   value: number,
+  duration = 1.2,
   deps: unknown[] = []
 ) {
-  const barRef = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
-    const bar = barRef.current;
-    if (!bar) return;
-
-    gsap.set(bar, { width: "0%" });
+    const el = ref.current;
+    if (!el) return;
 
     const ctx = gsap.context(() => {
-      gsap.to(bar, {
-        width: `${Math.min(value, 100)}%`,
-        duration: 1,
+      const start = { val: 0 };
+      gsap.to(start, {
+        val: value,
+        duration,
         ease: "power3.out",
+        onUpdate: () => {
+          el.textContent = Math.round(start.val).toLocaleString();
+        },
       });
-    }, bar);
+    }, el);
 
     return () => ctx.revert();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value, ...deps]);
+  }, [value, duration, ...deps]);
 
-  return barRef;
+  return ref;
 }
