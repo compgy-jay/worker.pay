@@ -1,6 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import gsap from "gsap";
+import { useEntranceAnimation } from "@/hooks/useEntranceAnimation";
 import { downloadCsv, formatDate, formatMoney, mondayISO, toQueryString, todayISO } from "@/lib/format";
 import type {
   Material,
@@ -196,6 +198,17 @@ export default function Home() {
     query: "",
   });
   const [editingMaterial, setEditingMaterial] = useState<Record<number, MaterialDraft>>({});
+
+  const mainRef = useEntranceAnimation([tab, booting]);
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!contentRef.current || booting) return;
+    const ctx = gsap.context(() => {
+      gsap.fromTo(contentRef.current, { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.3, ease: "power2.out" });
+    }, contentRef);
+    return () => ctx.revert();
+  }, [tab, booting]);
 
   const currency = settings?.currency || "KES";
   const money = useCallback((value: number) => formatMoney(value, currency), [currency]);
@@ -601,7 +614,7 @@ export default function Home() {
   ];
 
   return (
-    <div className="min-h-screen bg-parchment text-ink">
+    <div ref={mainRef} className="min-h-screen bg-parchment text-ink">
       {notice && (
         <div className={`fixed top-4 right-4 z-50 rounded-lg px-4 py-3 text-sm font-medium shadow-lg ${notice.type === "success" ? "bg-emerald-500 text-white" : "bg-rose-500 text-white"}`}>
           {notice.message}
@@ -648,19 +661,19 @@ export default function Home() {
         {booting ? (
           <div className="rounded-lg border border-giza-amber/30 bg-giza-amber/10 p-8 text-center text-giza-amber">⏳ Loading project data...</div>
         ) : (
-          <>
+          <div ref={contentRef}>
             {tab === "dashboard" && (
               <section className="flex flex-col gap-6">
                 <SectionTitle eyebrow="Dashboard" title="Project Health & Metrics" />
 
-                <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+                <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4" data-animate>
                   <MetricCard label="Total Spend" value={money(summary.grandTotal)} detail="Labor + Materials" tone="blue" />
                   <MetricCard label="Outstanding Labor" value={money(summary.unpaidTotal)} detail={`${summary.unpaidRecordCount} pending`} tone="red" />
                   <MetricCard label="Material Cost" value={money(summary.materialTotal)} detail={`${summary.materialCount} items`} tone="amber" />
                   <MetricCard label="Team Size" value={String(summary.workerCount)} detail={`${departments.length || 0} department(s)`} tone="green" />
                 </div>
 
-                <div className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
+                <div className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]" data-animate>
                   <div className="panel p-5">
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <div>
@@ -716,7 +729,7 @@ export default function Home() {
                   </div>
                 </div>
 
-                <div className="grid gap-4 lg:grid-cols-2">
+                <div className="grid gap-4 lg:grid-cols-2" data-animate>
                   <div className="panel p-5">
                     <div className="flex items-center justify-between gap-3">
                       <h3 className="text-lg font-semibold text-ink">Pending Labor Costs</h3>
@@ -767,7 +780,7 @@ export default function Home() {
               <section className="flex flex-col gap-5">
                 <SectionTitle eyebrow="Team Management" title="Team Members" />
 
-                <div className="panel p-5">
+                <div className="panel p-5" data-animate>
                   <div className="grid gap-3 md:grid-cols-[1fr_1fr_1fr_auto]">
                     <input
                       className="control"
@@ -869,7 +882,7 @@ export default function Home() {
                   action={<button className="secondary-button" onClick={exportWages}>📥 Export CSV</button>}
                 />
 
-                <div className="panel p-5">
+                <div className="panel p-5" data-animate>
                   <div className="grid gap-3 lg:grid-cols-[1.2fr_0.8fr_0.8fr_auto]">
                     <select className="control" value={salaryWorkerId} onChange={(event) => setSalaryWorkerId(event.target.value)}>
                       <option value="">Select team member</option>
@@ -985,7 +998,7 @@ export default function Home() {
                   action={<button className="secondary-button" onClick={exportMaterials}>📥 Export CSV</button>}
                 />
 
-                <div className="panel p-5">
+                <div className="panel p-5" data-animate>
                   <div className="grid gap-3 lg:grid-cols-[1.2fr_0.5fr_0.5fr_0.7fr_0.8fr_0.8fr_auto]">
                     <input className="control" placeholder="Item/Material name" value={materialDraft.name} onChange={(event) => setMaterialDraft((current) => ({ ...current, name: event.target.value }))} />
                     <input className="control" type="number" min="0" step="0.01" placeholder="Qty" value={materialDraft.quantity} onChange={(event) => setMaterialDraft((current) => ({ ...current, quantity: event.target.value }))} />
@@ -1106,7 +1119,7 @@ export default function Home() {
               <section className="flex flex-col gap-5">
                 <SectionTitle eyebrow="Configuration" title="Project Settings & Reports" />
 
-                <div className="panel p-5">
+                <div className="panel p-5" data-animate>
                   <div className="grid gap-4 md:grid-cols-2">
                     <label className="field-label">
                       Project Name
@@ -1149,7 +1162,7 @@ export default function Home() {
                 </div>
               </section>
             )}
-          </>
+          </div>
         )}
       </main>
     </div>

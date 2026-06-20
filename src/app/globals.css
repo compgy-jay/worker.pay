@@ -59,6 +59,12 @@ select:focus-visible {
   border-radius: 8px;
   background: var(--card);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.panel:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
 }
 
 .metric-card {
@@ -67,6 +73,12 @@ select:focus-visible {
   background: var(--card);
   padding: 1rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.metric-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
 }
 
 .control {
@@ -210,6 +222,14 @@ select:focus-visible {
   color: var(--ink);
   padding: 0.75rem;
   vertical-align: middle;
+}
+
+.data-table tbody tr {
+  transition: background-color 0.15s ease;
+}
+
+.data-table tbody tr:hover {
+  background-color: rgba(200, 168, 78, 0.05);
 }
 
 .table-actions {
