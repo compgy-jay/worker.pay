@@ -9,6 +9,8 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@fontsource/noto-serif-sc": "^5.2.9",
+    "@fontsource/outfit": "^5.2.8",
     "@libsql/client": "^0.17.4",
     "next": "16.2.6",
     "react": "19.2.4",
