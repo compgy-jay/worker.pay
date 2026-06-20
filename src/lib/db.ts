@@ -1,7 +1,7 @@
 import Database from "better-sqlite3";
 import path from "path";
 
-// Example for better path management in production
+// Falls back safely to a localized build file if the live environment isn't available yet
 const dbPath = process.env.DATABASE_URL || path.join(__dirname, 'database.sqlite');
 const db = new Database(dbPath);
 
