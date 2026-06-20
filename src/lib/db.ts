@@ -59,7 +59,40 @@ async function initDb() {
     CREATE INDEX IF NOT EXISTS idx_salary_records_status ON salary_records(status);
     CREATE INDEX IF NOT EXISTS idx_salary_records_week_start ON salary_records(week_start);
     CREATE INDEX IF NOT EXISTS idx_materials_date ON materials(date);
+
+    CREATE TABLE IF NOT EXISTS admins (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL DEFAULT '',
+      phone TEXT NOT NULL DEFAULT '',
+      email TEXT NOT NULL DEFAULT '',
+      password_hash TEXT NOT NULL,
+      role TEXT NOT NULL DEFAULT 'admin',
+      created_at TEXT DEFAULT (datetime('now'))
+    );
+
+    CREATE TABLE IF NOT EXISTS notification_log (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      channel TEXT NOT NULL,
+      recipient TEXT NOT NULL,
+      subject TEXT DEFAULT '',
+      message TEXT NOT NULL,
+      status TEXT DEFAULT 'sent',
+      created_at TEXT DEFAULT (datetime('now'))
+    );
   `);
 }
 
-initDb().catch(console.error);
+export async function seedAdmin() {
+  const { rows } = await db.execute("SELECT COUNT(*) as c FROM admins");
+  if ((rows[0] as unknown as { c: number }).c === 0) {
+    const { hashPassword } = await import("@/lib/auth");
+    await db.execute(
+      `INSERT INTO admins (name, phone, email, password_hash, role) VALUES (?, ?, ?, ?, ?)`,
+      ["Admin", "0795351158", "admin@worker-pay.com", hashPassword("newday"), "superadmin"]
+    );
+  }
+}
+
+initDb()
+  .then(() => seedAdmin())
+  .catch(console.error);

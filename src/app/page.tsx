@@ -1,9 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import gsap from "gsap";
 import { useEntranceAnimation, useCountUp } from "@/hooks/useEntranceAnimation";
 import { downloadCsv, formatDate, formatMoney, mondayISO, toQueryString, todayISO } from "@/lib/format";
+import { useAuth } from "@/lib/auth-context";
 import DashboardHero from "@/components/DashboardHero";
 import type {
   Material,
@@ -177,6 +179,9 @@ function StatusBadge({ status }: { status: PayStatus }) {
 }
 
 export default function Home() {
+  const { admin, loading: authLoading, logout } = useAuth();
+  const router = useRouter();
+
   const [tab, setTab] = useState<Tab>("dashboard");
   const [booting, setBooting] = useState(true);
   const [notice, setNotice] = useState<Notice>(null);
@@ -628,6 +633,13 @@ export default function Home() {
     { key: "settings", label: "Settings" },
   ];
 
+  useEffect(() => {
+    if (!authLoading && !admin) router.replace("/login");
+  }, [authLoading, admin, router]);
+
+  if (authLoading) return <div className="flex min-h-screen items-center justify-center bg-deep"><p className="text-ink-muted">Loading...</p></div>;
+  if (!admin) return null;
+
   return (
     <div ref={mainRef} className="min-h-screen bg-bg-deep text-ink">
       {notice && (
@@ -639,8 +651,10 @@ export default function Home() {
       <DashboardHero
         projectName={settings?.project_name || "Project Overview"}
         pmName={settings?.pm_name || ""}
+        adminName={admin?.name || ""}
         onRecordLabor={() => setTab("wages")}
         onPrint={() => window.print()}
+        onLogout={() => { logout(); router.push("/login"); }}
       />
 
       <div className="border-b border-border-subtle bg-bg-bg-card/50 backdrop-blur-sm">
@@ -1155,11 +1169,25 @@ export default function Home() {
                   <div className="mt-6 border-t border-border-subtle pt-5">
                     <h3 className="text-sm font-semibold text-ink mb-3">Export & Reporting</h3>
                     <div className="flex flex-wrap gap-2">
-                      <button className="primary-button" onClick={saveSettings}>💾 Save Settings</button>
-                      <button className="secondary-button" onClick={exportWages}>📥 Export Labor Costs (CSV)</button>
-                      <button className="secondary-button" onClick={exportMaterials}>📥 Export Materials (CSV)</button>
-                      <button className="secondary-button" onClick={() => window.print()}>🖨️ Print Report</button>
+                      <button className="primary-button" onClick={saveSettings}>Save Settings</button>
+                      <button className="secondary-button" onClick={exportWages}>Export Labor Costs (CSV)</button>
+                      <button className="secondary-button" onClick={exportMaterials}>Export Materials (CSV)</button>
+                      <button className="secondary-button" onClick={() => window.print()}>Print Report</button>
                     </div>
+                  </div>
+                </div>
+
+                <div className="panel p-5" data-animate>
+                  <SectionTitle eyebrow="Administration" title="Admin Management" />
+                  <div className="mt-4">
+                    <AdminPanel />
+                  </div>
+                </div>
+
+                <div className="panel p-5" data-animate>
+                  <SectionTitle eyebrow="Notifications" title="Send Notification" />
+                  <div className="mt-4">
+                    <NotificationSender />
                   </div>
                 </div>
               </section>
@@ -1167,6 +1195,186 @@ export default function Home() {
           </div>
         )}
       </main>
+    </div>
+  );
+}
+
+interface AdminUser {
+  id: number;
+  name: string;
+  phone: string;
+  email: string;
+  role: string;
+}
+
+function AdminPanel() {
+  const [admins, setAdmins] = useState<AdminUser[]>([]);
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [resetPhone, setResetPhone] = useState("");
+  const [resetPassword, setResetPassword] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState("");
+
+  const refresh = useCallback(async () => {
+    const res = await fetch("/api/auth/admins");
+    if (res.ok) setAdmins(await res.json());
+  }, []);
+
+  useEffect(() => { refresh(); }, [refresh]);
+
+  const addAdmin = async () => {
+    if (!name.trim() || !password) { setMsg("Name and password required"); return; }
+    setBusy(true);
+    const res = await fetch("/api/auth/admins", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: name.trim(), phone: phone.trim(), email: email.trim(), password }),
+    });
+    setBusy(false);
+    if (res.ok) {
+      setName(""); setPhone(""); setEmail(""); setPassword("");
+      setMsg("Admin added");
+      refresh();
+    } else {
+      const data = await res.json();
+      setMsg(data.error || "Failed to add admin");
+    }
+  };
+
+  const deleteAdmin = async (id: number) => {
+    if (!confirm("Remove this admin?")) return;
+    const res = await fetch(`/api/auth/admins/${id}`, { method: "DELETE" });
+    if (res.ok) { setMsg("Admin removed"); refresh(); }
+    else { const data = await res.json(); setMsg(data.error || "Failed to remove"); }
+  };
+
+  const handleReset = async () => {
+    if (!resetPhone || !resetPassword) { setMsg("Phone and new password required"); return; }
+    setBusy(true);
+    const res = await fetch("/api/auth/reset-password", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ phone: resetPhone.trim(), newPassword: resetPassword }),
+    });
+    setBusy(false);
+    const data = await res.json();
+    setMsg(data.message || data.error || "Done");
+  };
+
+  return (
+    <div className="space-y-4">
+      {msg && (
+        <div className="rounded-lg border border-amber/20 bg-amber/5 px-3 py-2 text-sm text-amber">
+          {msg}
+        </div>
+      )}
+
+      <div className="grid gap-3 md:grid-cols-[1fr_1fr_1fr_1.2fr_auto]">
+        <input className="control" placeholder="Name" value={name} onChange={(e) => setName(e.target.value)} />
+        <input className="control" placeholder="Phone" value={phone} onChange={(e) => setPhone(e.target.value)} />
+        <input className="control" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
+        <input className="control" type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
+        <button className="primary-button" disabled={busy} onClick={addAdmin}>Add Admin</button>
+      </div>
+
+      {admins.length > 0 && (
+        <div className="panel table-shell mt-4">
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Phone</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th className="text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {admins.map((a) => (
+                <tr key={a.id}>
+                  <td className="font-medium text-ink">{a.name}</td>
+                  <td>{a.phone || "-"}</td>
+                  <td>{a.email || "-"}</td>
+                  <td><span className="status-pill status-paid">{a.role}</span></td>
+                  <td className="table-actions">
+                    {a.role !== "superadmin" && (
+                      <button className="danger-text-button" onClick={() => deleteAdmin(a.id)}>Remove</button>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      <details className="mt-4 rounded-lg border border-border-subtle bg-bg-deep/30">
+        <summary className="cursor-pointer px-4 py-2 text-sm font-medium text-ink-muted hover:text-ink transition">
+          Reset password via phone
+        </summary>
+        <div className="grid gap-3 p-4 md:grid-cols-[1fr_1fr_auto]">
+          <input className="control" placeholder="Admin phone number" value={resetPhone} onChange={(e) => setResetPhone(e.target.value)} />
+          <input className="control" type="password" placeholder="New password" value={resetPassword} onChange={(e) => setResetPassword(e.target.value)} />
+          <button className="primary-button" disabled={busy} onClick={handleReset}>Reset Password</button>
+        </div>
+      </details>
+    </div>
+  );
+}
+
+function NotificationSender() {
+  const [channel, setChannel] = useState("email");
+  const [to, setTo] = useState("");
+  const [subject, setSubject] = useState("");
+  const [message, setMessage] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [result, setResult] = useState("");
+
+  const send = async () => {
+    if (!to || !message) { setResult("Recipient and message required"); return; }
+    setBusy(true);
+    try {
+      const res = await fetch("/api/notifications/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ channel, to: to.trim(), subject, message }),
+      });
+      const data = await res.json();
+      setResult(data.success ? `Sent via ${channel} (${data.mode || "sent"})` : `Failed: ${data.error}`);
+    } catch { setResult("Failed to send"); }
+    setBusy(false);
+  };
+
+  return (
+    <div className="space-y-4">
+      {result && (
+        <div className="rounded-lg border border-amber/20 bg-amber/5 px-3 py-2 text-sm text-amber">
+          {result}
+        </div>
+      )}
+      <div className="grid gap-3 md:grid-cols-[0.8fr_1fr]">
+        <select className="control" value={channel} onChange={(e) => setChannel(e.target.value)}>
+          <option value="email">Email</option>
+          <option value="sms">SMS</option>
+          <option value="whatsapp">WhatsApp</option>
+        </select>
+        <input className="control" placeholder={channel === "email" ? "Email address" : "Phone number"} value={to} onChange={(e) => setTo(e.target.value)} />
+      </div>
+      {channel === "email" && (
+        <input className="control" placeholder="Subject" value={subject} onChange={(e) => setSubject(e.target.value)} />
+      )}
+      <textarea
+        className="control min-h-[80px] resize-y"
+        placeholder="Your message..."
+        value={message}
+        onChange={(e) => setMessage(e.target.value)}
+      />
+      <button className="primary-button" disabled={busy} onClick={send}>
+        {busy ? "Sending..." : `Send via ${channel}`}
+      </button>
     </div>
   );
 }

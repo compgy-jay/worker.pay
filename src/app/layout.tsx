@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import Providers from "@/components/Providers";
 
 export const metadata: Metadata = {
   title: "ProjectHub — Project Management & Cost Tracking",
@@ -14,6 +15,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full antialiased">
       <body className="min-h-full flex flex-col">
+        <Providers>
         <header className="sticky top-0 z-30 border-b border-border-subtle bg-bg-deep/80 backdrop-blur-xl">
           <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3">
             <div className="flex items-center gap-3">
@@ -42,6 +44,7 @@ export default function RootLayout({
             </p>
           </div>
         </footer>
+        </Providers>
       </body>
     </html>
   );

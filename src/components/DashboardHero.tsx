@@ -6,13 +6,17 @@ import gsap from "gsap";
 export default function DashboardHero({
   projectName,
   pmName,
+  adminName,
   onRecordLabor,
   onPrint,
+  onLogout,
 }: {
   projectName: string;
   pmName: string;
+  adminName?: string;
   onRecordLabor: () => void;
   onPrint: () => void;
+  onLogout?: () => void;
 }) {
   const sectionRef = useRef<HTMLElement>(null);
   const glowRef = useRef<HTMLDivElement>(null);
@@ -43,7 +47,8 @@ export default function DashboardHero({
       <div className="hero-glow" style={{ bottom: "20%", right: "70%", width: "400px", height: "400px" }} />
 
       <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-col gap-6 px-6 py-16 md:py-20">
-        <div className="flex flex-col gap-2">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2">
             <span className="inline-block h-2 w-2 rounded-full bg-amber shadow-[0_0_8px_rgba(200,168,78,0.5)]" />
             <span className="text-xs font-semibold uppercase tracking-[0.22em] text-amber">
@@ -60,21 +65,38 @@ export default function DashboardHero({
           </p>
         </div>
 
-        <div className="flex flex-wrap gap-3">
-          <button className="primary-button" onClick={onRecordLabor}>
-            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
-            Record Labor Cost
-          </button>
-          <button className="secondary-button" onClick={onPrint}>
-            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-            </svg>
-            Print Report
-          </button>
+        <div className="flex flex-col items-end gap-3">
+          {adminName && (
+            <div className="flex items-center gap-2 rounded-lg border border-border-subtle bg-bg-deep/60 px-3 py-1.5">
+              <div className="flex h-6 w-6 items-center justify-center rounded-full bg-amber/20 text-xs font-bold text-amber">
+                {adminName.charAt(0).toUpperCase()}
+              </div>
+              <span className="text-sm text-ink-muted">{adminName}</span>
+            </div>
+          )}
+          {onLogout && (
+            <button onClick={onLogout} className="text-xs text-ink-muted underline underline-offset-2 hover:text-amber transition">
+              Sign Out
+            </button>
+          )}
         </div>
       </div>
+
+      <div className="flex flex-wrap gap-3">
+        <button className="primary-button" onClick={onRecordLabor}>
+          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+          </svg>
+          Record Labor Cost
+        </button>
+        <button className="secondary-button" onClick={onPrint}>
+          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+          </svg>
+          Print Report
+        </button>
+      </div>
+    </div>
     </section>
   );
 }
