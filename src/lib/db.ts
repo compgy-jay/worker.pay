@@ -1,4 +1,5 @@
 import { createClient } from '@libsql/client';
+import { hashPassword } from "@/lib/auth";
 
 const url = process.env.DATABASE_URL || 'file:local.db';
 const authToken = process.env.DATABASE_AUTH_TOKEN || '';
@@ -82,10 +83,9 @@ async function initDb() {
   `);
 }
 
-export async function seedAdmin() {
+async function seedAdmin() {
   const { rows } = await db.execute("SELECT COUNT(*) as c FROM admins");
   if ((rows[0] as unknown as { c: number }).c === 0) {
-    const { hashPassword } = await import("@/lib/auth");
     await db.execute(
       `INSERT INTO admins (name, phone, email, password_hash, role) VALUES (?, ?, ?, ?, ?)`,
       ["Admin", "0795351158", "admin@worker-pay.com", hashPassword("newday"), "superadmin"]
@@ -93,6 +93,10 @@ export async function seedAdmin() {
   }
 }
 
-initDb()
+const ready = initDb()
   .then(() => seedAdmin())
   .catch(console.error);
+
+export async function waitReady() {
+  await ready;
+}

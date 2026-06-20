@@ -1,10 +1,11 @@
 export const dynamic = 'force-dynamic';
 
 import { NextResponse } from "next/server";
-import { db } from "@/lib/db";
+import { db, waitReady } from "@/lib/db";
 import { hashPassword } from "@/lib/auth";
 
 export async function POST(request: Request) {
+  await waitReady();
   const { phone, newPassword } = await request.json();
   if (!phone || !newPassword || newPassword.length < 4) {
     return NextResponse.json({ error: "Phone and new password (min 4 chars) are required" }, { status: 400 });
