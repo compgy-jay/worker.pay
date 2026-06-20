@@ -5,8 +5,12 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
-    "lint": "eslint"
+    "start": "node .next/standalone/server.js",
+    "lint": "eslint",
+    "standalone": "npm run build && node .next/standalone/server.js",
+    "package:unix": "bash portable/package.sh",
+    "package:win": "portable\\package.bat",
+    "dist": "npm run build && bash portable/package.sh"
   },
   "dependencies": {
     "@fontsource/noto-serif-sc": "^5.2.9",

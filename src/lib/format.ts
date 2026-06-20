@@ -1,13 +1,32 @@
+const currencyToLocale: Record<string, string> = {
+  KES: "en-KE", USD: "en-US", EUR: "de-DE", GBP: "en-GB",
+  JPY: "ja-JP", CNY: "zh-CN", INR: "en-IN", NGN: "en-NG",
+  ZAR: "en-ZA", TZS: "en-TZ", UGX: "en-UG", RWF: "en-RW",
+  ETB: "en-ET", GHS: "en-GH", XAF: "fr-CM", XOF: "fr-CI",
+  MAD: "ar-MA", EGP: "ar-EG", SAR: "ar-SA", AED: "ar-AE",
+  BRL: "pt-BR", CAD: "en-CA", AUD: "en-AU", NZD: "en-NZ",
+  CHF: "de-CH", SEK: "sv-SE", NOK: "nb-NO", DKK: "da-DK",
+  PLN: "pl-PL", CZK: "cs-CZ", HUF: "hu-HU", TRY: "tr-TR",
+  RUB: "ru-RU", MXN: "es-MX", ARS: "es-AR", CLP: "es-CL",
+  COP: "es-CO", PEN: "es-PE", PHP: "en-PH", SGD: "en-SG",
+  MYR: "ms-MY", THB: "th-TH", IDR: "id-ID", VND: "vi-VN",
+  KRW: "ko-KR", PKR: "en-PK", BDT: "bn-BD", LKR: "si-LK",
+  NPR: "ne-NP", BHD: "ar-BH", OMR: "ar-OM", QAR: "ar-QA",
+  KWD: "ar-KW", JOD: "ar-JO", LBP: "ar-LB", ILS: "he-IL",
+  IRR: "fa-IR", AFN: "ps-AF", MMK: "my-MM",
+};
+
 export function formatMoney(value: number, currency = "KES") {
   const safeValue = Number.isFinite(value) ? value : 0;
+  const locale = currencyToLocale[currency] || "en-KE";
   try {
-    return new Intl.NumberFormat("en-KE", {
+    return new Intl.NumberFormat(locale, {
       style: "currency",
-      currency: currency || "KES",
+      currency,
       maximumFractionDigits: 2,
     }).format(safeValue);
   } catch {
-    return `${currency || "KES"} ${safeValue.toLocaleString("en-KE", { maximumFractionDigits: 2 })}`;
+    return `${currency} ${safeValue.toLocaleString(locale, { maximumFractionDigits: 2 })}`;
   }
 }
 

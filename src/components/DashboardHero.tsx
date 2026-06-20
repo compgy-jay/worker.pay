@@ -6,17 +6,13 @@ import gsap from "gsap";
 export default function DashboardHero({
   projectName,
   pmName,
-  adminName,
   onRecordLabor,
   onPrint,
-  onLogout,
 }: {
   projectName: string;
   pmName: string;
-  adminName?: string;
   onRecordLabor: () => void;
   onPrint: () => void;
-  onLogout?: () => void;
 }) {
   const sectionRef = useRef<HTMLElement>(null);
   const glowRef = useRef<HTMLDivElement>(null);
@@ -65,21 +61,7 @@ export default function DashboardHero({
           </p>
         </div>
 
-        <div className="flex flex-col items-end gap-3">
-          {adminName && (
-            <div className="flex items-center gap-2 rounded-lg border border-border-subtle bg-bg-deep/60 px-3 py-1.5">
-              <div className="flex h-6 w-6 items-center justify-center rounded-full bg-amber/20 text-xs font-bold text-amber">
-                {adminName.charAt(0).toUpperCase()}
-              </div>
-              <span className="text-sm text-ink-muted">{adminName}</span>
-            </div>
-          )}
-          {onLogout && (
-            <button onClick={onLogout} className="text-xs text-ink-muted underline underline-offset-2 hover:text-amber transition">
-              Sign Out
-            </button>
-          )}
-        </div>
+        <div className="flex flex-col items-end gap-3" />
       </div>
 
       <div className="flex flex-wrap gap-3">

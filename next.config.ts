@@ -1,7 +1,13 @@
+import path from "path";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  output: "standalone",
+  outputFileTracingRoot: path.resolve("."),
+  serverExternalPackages: ["@libsql/client"],
+  env: {
+    DATABASE_URL: process.env.DATABASE_URL || "file:local.db",
+  },
 };
 
 export default nextConfig;

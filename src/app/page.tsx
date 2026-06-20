@@ -1,11 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
 import gsap from "gsap";
 import { useEntranceAnimation, useCountUp } from "@/hooks/useEntranceAnimation";
 import { downloadCsv, formatDate, formatMoney, mondayISO, toQueryString, todayISO } from "@/lib/format";
-import { useAuth } from "@/lib/auth-context";
 import DashboardHero from "@/components/DashboardHero";
 import type {
   Material,
@@ -179,8 +177,6 @@ function StatusBadge({ status }: { status: PayStatus }) {
 }
 
 export default function Home() {
-  const { admin, loading: authLoading, logout } = useAuth();
-  const router = useRouter();
 
   const [tab, setTab] = useState<Tab>("dashboard");
   const [booting, setBooting] = useState(true);
@@ -633,13 +629,6 @@ export default function Home() {
     { key: "settings", label: "Settings" },
   ];
 
-  useEffect(() => {
-    if (!authLoading && !admin) router.replace("/login");
-  }, [authLoading, admin, router]);
-
-  if (authLoading) return <div className="flex min-h-screen items-center justify-center bg-deep"><p className="text-ink-muted">Loading...</p></div>;
-  if (!admin) return null;
-
   return (
     <div ref={mainRef} className="min-h-screen bg-bg-deep text-ink">
       {notice && (
@@ -651,10 +640,8 @@ export default function Home() {
       <DashboardHero
         projectName={settings?.project_name || "Project Overview"}
         pmName={settings?.pm_name || ""}
-        adminName={admin?.name || ""}
         onRecordLabor={() => setTab("wages")}
         onPrint={() => window.print()}
-        onLogout={() => { logout(); router.push("/login"); }}
       />
 
       <div className="border-b border-border-subtle bg-bg-bg-card/50 backdrop-blur-sm">
@@ -1142,8 +1129,63 @@ export default function Home() {
                       <input className="control" value={settingsDraft.project_name} onChange={(event) => setSettingsDraft((current) => ({ ...current, project_name: event.target.value }))} />
                     </label>
                     <label className="field-label">
-                      Currency Code
-                      <input className="control uppercase" maxLength={3} value={settingsDraft.currency} onChange={(event) => setSettingsDraft((current) => ({ ...current, currency: event.target.value.toUpperCase() }))} />
+                      Currency
+                      <select className="control" value={settingsDraft.currency} onChange={(event) => setSettingsDraft((current) => ({ ...current, currency: event.target.value }))}>
+                        <option value="KES">KES - Kenyan Shilling (Ksh)</option>
+                        <option value="USD">USD - US Dollar ($)</option>
+                        <option value="EUR">EUR - Euro (€)</option>
+                        <option value="GBP">GBP - British Pound (£)</option>
+                        <option value="JPY">JPY - Japanese Yen (¥)</option>
+                        <option value="CNY">CNY - Chinese Yuan (¥)</option>
+                        <option value="INR">INR - Indian Rupee (₹)</option>
+                        <option value="NGN">NGN - Nigerian Naira (₦)</option>
+                        <option value="ZAR">ZAR - South African Rand (R)</option>
+                        <option value="TZS">TZS - Tanzanian Shilling (TSh)</option>
+                        <option value="UGX">UGX - Ugandan Shilling (USh)</option>
+                        <option value="RWF">RWF - Rwandan Franc (FRw)</option>
+                        <option value="ETB">ETB - Ethiopian Birr (Br)</option>
+                        <option value="GHS">GHS - Ghanaian Cedi (₵)</option>
+                        <option value="XAF">XAF - Central African CFA (FCFA)</option>
+                        <option value="XOF">XOF - West African CFA (CFA)</option>
+                        <option value="MAD">MAD - Moroccan Dirham (DH)</option>
+                        <option value="EGP">EGP - Egyptian Pound (E£)</option>
+                        <option value="AED">AED - UAE Dirham (د.إ)</option>
+                        <option value="SAR">SAR - Saudi Riyal (﷼)</option>
+                        <option value="QAR">QAR - Qatari Riyal (﷼)</option>
+                        <option value="KWD">KWD - Kuwaiti Dinar (د.ك)</option>
+                        <option value="BHD">BHD - Bahraini Dinar (د.ب)</option>
+                        <option value="OMR">OMR - Omani Riyal (﷼)</option>
+                        <option value="ILS">ILS - Israeli Shekel (₪)</option>
+                        <option value="TRY">TRY - Turkish Lira (₺)</option>
+                        <option value="RUB">RUB - Russian Ruble (₽)</option>
+                        <option value="CHF">CHF - Swiss Franc (Fr)</option>
+                        <option value="SEK">SEK - Swedish Krona (kr)</option>
+                        <option value="NOK">NOK - Norwegian Krone (kr)</option>
+                        <option value="DKK">DKK - Danish Krone (kr)</option>
+                        <option value="PLN">PLN - Polish Zloty (zł)</option>
+                        <option value="CZK">CZK - Czech Koruna (Kč)</option>
+                        <option value="HUF">HUF - Hungarian Forint (Ft)</option>
+                        <option value="BRL">BRL - Brazilian Real (R$)</option>
+                        <option value="MXN">MXN - Mexican Peso ($)</option>
+                        <option value="ARS">ARS - Argentine Peso ($)</option>
+                        <option value="CLP">CLP - Chilean Peso ($)</option>
+                        <option value="COP">COP - Colombian Peso ($)</option>
+                        <option value="CAD">CAD - Canadian Dollar ($)</option>
+                        <option value="AUD">AUD - Australian Dollar (A$)</option>
+                        <option value="NZD">NZD - New Zealand Dollar (NZ$)</option>
+                        <option value="SGD">SGD - Singapore Dollar (S$)</option>
+                        <option value="MYR">MYR - Malaysian Ringgit (RM)</option>
+                        <option value="THB">THB - Thai Baht (฿)</option>
+                        <option value="PHP">PHP - Philippine Peso (₱)</option>
+                        <option value="IDR">IDR - Indonesian Rupiah (Rp)</option>
+                        <option value="VND">VND - Vietnamese Dong (₫)</option>
+                        <option value="KRW">KRW - South Korean Won (₩)</option>
+                        <option value="PKR">PKR - Pakistani Rupee (₨)</option>
+                        <option value="BDT">BDT - Bangladeshi Taka (৳)</option>
+                        <option value="LKR">LKR - Sri Lankan Rupee (₨)</option>
+                        <option value="NPR">NPR - Nepalese Rupee (₨)</option>
+                        <option value="PEN">PEN - Peruvian Sol (S/)</option>
+                      </select>
                     </label>
                     <label className="field-label">
                       Total Budget
