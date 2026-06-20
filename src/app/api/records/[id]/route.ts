@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic';
 
 import { NextResponse } from "next/server";
-import db from "@/lib/db";
+import { db } from "@/lib/db";
 
 const PAY_STATUSES = new Set(["paid", "unpaid"]);
 
@@ -49,20 +49,21 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
   updates.push("updated_at = datetime('now')");
   values.push(id);
 
-  const result = db
-    .prepare(`UPDATE salary_records SET ${updates.join(", ")} WHERE id = ?`)
-    .run(...values);
-  if (result.changes === 0) {
+  const result = await db.execute(
+    `UPDATE salary_records SET ${updates.join(", ")} WHERE id = ?`,
+    values
+  );
+  if (result.rowsAffected === 0) {
     return NextResponse.json({ error: "Record not found" }, { status: 404 });
   }
-  const record = db.prepare("SELECT * FROM salary_records WHERE id = ?").get(id);
-  return NextResponse.json(record);
+  const { rows } = await db.execute("SELECT * FROM salary_records WHERE id = ?", [id]);
+  return NextResponse.json(rows[0]);
 }
 
 export async function DELETE(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const result = db.prepare("DELETE FROM salary_records WHERE id = ?").run(id);
-  if (result.changes === 0) {
+  const result = await db.execute("DELETE FROM salary_records WHERE id = ?", [id]);
+  if (result.rowsAffected === 0) {
     return NextResponse.json({ error: "Record not found" }, { status: 404 });
   }
   return NextResponse.json({ success: true });

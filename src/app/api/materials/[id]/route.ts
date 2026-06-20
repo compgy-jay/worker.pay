@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic';
 
 import { NextResponse } from "next/server";
-import db from "@/lib/db";
+import { db } from "@/lib/db";
 
 function parseNonNegativeNumber(value: unknown) {
   if (value == null) return null;
@@ -30,20 +30,18 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
   if (name !== undefined && (typeof name !== "string" || !name.trim())) {
     return NextResponse.json({ error: "Material name is required" }, { status: 400 });
   }
-  const result = db
-    .prepare(
-      `UPDATE materials SET
-        name = COALESCE(?, name),
-        quantity = COALESCE(?, quantity),
-        unit = COALESCE(?, unit),
-        cost = COALESCE(?, cost),
-        date = COALESCE(?, date),
-        category = COALESCE(?, category),
-        supplier = COALESCE(?, supplier),
-        notes = COALESCE(?, notes)
-      WHERE id = ?`
-    )
-    .run(
+  const result = await db.execute(
+    `UPDATE materials SET
+      name = COALESCE(?, name),
+      quantity = COALESCE(?, quantity),
+      unit = COALESCE(?, unit),
+      cost = COALESCE(?, cost),
+      date = COALESCE(?, date),
+      category = COALESCE(?, category),
+      supplier = COALESCE(?, supplier),
+      notes = COALESCE(?, notes)
+    WHERE id = ?`,
+    [
       name?.trim(),
       parsedQuantity,
       unit,
@@ -52,19 +50,20 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       category?.trim(),
       supplier?.trim(),
       notes,
-      id
-    );
-  if (result.changes === 0) {
+      id,
+    ]
+  );
+  if (result.rowsAffected === 0) {
     return NextResponse.json({ error: "Material not found" }, { status: 404 });
   }
-  const material = db.prepare("SELECT * FROM materials WHERE id = ?").get(id);
-  return NextResponse.json(material);
+  const { rows } = await db.execute("SELECT * FROM materials WHERE id = ?", [id]);
+  return NextResponse.json(rows[0]);
 }
 
 export async function DELETE(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const result = db.prepare("DELETE FROM materials WHERE id = ?").run(id);
-  if (result.changes === 0) {
+  const result = await db.execute("DELETE FROM materials WHERE id = ?", [id]);
+  if (result.rowsAffected === 0) {
     return NextResponse.json({ error: "Material not found" }, { status: 404 });
   }
   return NextResponse.json({ success: true });

@@ -1,11 +1,11 @@
 export const dynamic = 'force-dynamic';
 
 import { NextResponse } from "next/server";
-import db from "@/lib/db";
+import { db } from "@/lib/db";
 
 export async function GET() {
-  const settings = db.prepare("SELECT * FROM project_settings WHERE id = 1").get();
-  return NextResponse.json(settings);
+  const { rows } = await db.execute("SELECT * FROM project_settings WHERE id = 1");
+  return NextResponse.json(rows[0]);
 }
 
 export async function PUT(request: Request) {
@@ -26,7 +26,7 @@ export async function PUT(request: Request) {
     return NextResponse.json({ error: "Currency must be a 3-letter code" }, { status: 400 });
   }
 
-  db.prepare(
+  await db.execute(
     `UPDATE project_settings SET
       project_name = COALESCE(?, project_name),
       pm_name = COALESCE(?, pm_name),
@@ -35,16 +35,17 @@ export async function PUT(request: Request) {
       foreman_contact = COALESCE(?, foreman_contact),
       currency = COALESCE(?, currency),
       budget = COALESCE(?, budget)
-    WHERE id = 1`
-  ).run(
-    project_name?.trim(),
-    pm_name?.trim(),
-    pm_contact?.trim(),
-    foreman_name?.trim(),
-    foreman_contact?.trim(),
-    currency?.trim().toUpperCase(),
-    parsedBudget
+    WHERE id = 1`,
+    [
+      project_name?.trim(),
+      pm_name?.trim(),
+      pm_contact?.trim(),
+      foreman_name?.trim(),
+      foreman_contact?.trim(),
+      currency?.trim().toUpperCase(),
+      parsedBudget,
+    ]
   );
-  const settings = db.prepare("SELECT * FROM project_settings WHERE id = 1").get();
-  return NextResponse.json(settings);
+  const { rows } = await db.execute("SELECT * FROM project_settings WHERE id = 1");
+  return NextResponse.json(rows[0]);
 }

@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic';
 
 import { NextResponse } from "next/server";
-import db from "@/lib/db";
+import { db } from "@/lib/db";
 
 function parseNonNegativeNumber(value: unknown, fallback?: number) {
   if (value == null || value === "") return fallback ?? null;
@@ -47,8 +47,8 @@ export async function GET(request: Request) {
   }
 
   const sql = `SELECT * FROM materials${where.length ? ` WHERE ${where.join(" AND ")}` : ""} ORDER BY date DESC, id DESC`;
-  const materials = db.prepare(sql).all(...params);
-  return NextResponse.json(materials);
+  const { rows } = await db.execute(sql, params);
+  return NextResponse.json(rows);
 }
 
 export async function POST(request: Request) {
@@ -68,11 +68,9 @@ export async function POST(request: Request) {
   if (!isValidDate(materialDate)) {
     return NextResponse.json({ error: "Date must be a YYYY-MM-DD date" }, { status: 400 });
   }
-  const result = db
-    .prepare(
-      "INSERT INTO materials (name, quantity, unit, cost, date, category, supplier, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
-    )
-    .run(
+  const result = await db.execute(
+    "INSERT INTO materials (name, quantity, unit, cost, date, category, supplier, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+    [
       name.trim(),
       parsedQuantity,
       unit || "pcs",
@@ -80,8 +78,9 @@ export async function POST(request: Request) {
       materialDate,
       category?.trim() || "",
       supplier?.trim() || "",
-      notes || ""
-    );
-  const material = db.prepare("SELECT * FROM materials WHERE id = ?").get(result.lastInsertRowid);
-  return NextResponse.json(material, { status: 201 });
+      notes || "",
+    ]
+  );
+  const { rows } = await db.execute("SELECT * FROM materials WHERE id = ?", [Number(result.lastInsertRowid!)]);
+  return NextResponse.json(rows[0], { status: 201 });
 }

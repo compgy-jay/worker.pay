@@ -1,7 +1,7 @@
 export const dynamic = 'force-dynamic';
 
 import { NextResponse } from "next/server";
-import db from "@/lib/db";
+import { db } from "@/lib/db";
 
 const PAY_STATUSES = new Set(["paid", "unpaid"]);
 
@@ -75,8 +75,8 @@ export async function GET(request: Request) {
   }
 
   sql += " ORDER BY sr.week_start DESC, sr.id DESC";
-  const records = db.prepare(sql).all(...params);
-  return NextResponse.json(records);
+  const { rows } = await db.execute(sql, params);
+  return NextResponse.json(rows);
 }
 
 export async function POST(request: Request) {
@@ -91,8 +91,8 @@ export async function POST(request: Request) {
   if (!isValidDate(week_start)) {
     return NextResponse.json({ error: "week_start must be a YYYY-MM-DD date" }, { status: 400 });
   }
-  const worker = db.prepare("SELECT id FROM workers WHERE id = ?").get(parsedWorkerId);
-  if (!worker) {
+  const workerResult = await db.execute("SELECT id FROM workers WHERE id = ?", [parsedWorkerId]);
+  if (!workerResult.rows[0]) {
     return NextResponse.json({ error: "Worker not found" }, { status: 404 });
   }
   const parsedAmount = parseNonNegativeAmount(amount);
@@ -103,9 +103,10 @@ export async function POST(request: Request) {
   if (!PAY_STATUSES.has(payStatus)) {
     return NextResponse.json({ error: "status must be paid or unpaid" }, { status: 400 });
   }
-  const result = db
-    .prepare("INSERT INTO salary_records (worker_id, week_start, amount, status) VALUES (?, ?, ?, ?)")
-    .run(parsedWorkerId, week_start, parsedAmount, payStatus);
-  const record = db.prepare("SELECT * FROM salary_records WHERE id = ?").get(result.lastInsertRowid);
-  return NextResponse.json(record, { status: 201 });
+  const result = await db.execute(
+    "INSERT INTO salary_records (worker_id, week_start, amount, status) VALUES (?, ?, ?, ?)",
+    [parsedWorkerId, week_start, parsedAmount, payStatus]
+  );
+  const { rows } = await db.execute("SELECT * FROM salary_records WHERE id = ?", [Number(result.lastInsertRowid!)]);
+  return NextResponse.json(rows[0], { status: 201 });
 }
