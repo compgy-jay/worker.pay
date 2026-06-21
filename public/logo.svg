@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" fill="none">
+  <defs>
+    <linearGradient id="shield" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#12121e"/>
+      <stop offset="100%" stop-color="#0a0a12"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#c8a84e"/>
+      <stop offset="100%" stop-color="#e0c06e"/>
+    </linearGradient>
+    <linearGradient id="gold-glow" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#c8a84e"/>
+      <stop offset="100%" stop-color="#a8882e"/>
+    </linearGradient>
+    <linearGradient id="inner" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1a1a2e"/>
+      <stop offset="100%" stop-color="#12121e"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Outer shield -->
+  <path d="M200 30 L340 110 L340 230 C340 310 200 380 200 380 C200 380 60 310 60 230 L60 110 Z"
+        fill="url(#shield)" stroke="url(#gold)" stroke-width="2.5"/>
+
+  <!-- Inner shield -->
+  <path d="M200 65 L310 128 L310 225 C310 290 200 345 200 345 C200 345 90 290 90 225 L90 128 Z"
+        fill="url(#inner)" stroke="rgba(200,168,78,0.2)" stroke-width="1.5"/>
+
+  <!-- Building columns (bar chart) -->
+  <rect x="148" y="200" width="24" height="60" rx="3" fill="url(#gold-glow)" opacity="0.7"/>
+  <rect x="178" y="160" width="24" height="100" rx="3" fill="url(#gold)"/>
+  <rect x="208" y="180" width="24" height="80" rx="3" fill="url(#gold-glow)" opacity="0.85"/>
+  <rect x="238" y="220" width="24" height="40" rx="3" fill="url(#gold)" opacity="0.6"/>
+
+  <!-- Base bar -->
+  <rect x="140" y="260" width="120" height="10" rx="3" fill="url(#gold)" opacity="0.5"/>
+
+  <!-- Roof bar -->
+  <rect x="148" y="155" width="114" height="6" rx="3" fill="url(#gold)"/>
+
+  <!-- Checkmark circle glow -->
+  <circle cx="200" cy="210" r="32" fill="none" stroke="rgba(200,168,78,0.15)" stroke-width="8"/>
+  <!-- Checkmark -->
+  <path d="M185 210 L196 221 L216 198" stroke="url(#gold)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+
+  <!-- Border shine on shield left edge -->
+  <path d="M200 30 L340 110 L340 230 C340 310 200 380 200 380"
+        fill="none" stroke="url(#gold)" stroke-width="1.5" opacity="0.3"/>
+
+  <!-- Text: PROJECT -->
+  <text x="200" y="405" text-anchor="middle" font-family="Outfit, 'Segoe UI', Arial, sans-serif"
+        font-size="42" font-weight="600" letter-spacing="8" fill="#c8a84e" opacity="0.6">PROJECT</text>
+
+  <!-- Text: HUB -->
+  <text x="200" y="448" text-anchor="middle" font-family="Outfit, 'Segoe UI', Arial, sans-serif"
+        font-size="52" font-weight="700" letter-spacing="6" fill="url(#gold)">HUB</text>
+
+  <!-- Decorative line -->
+  <line x1="120" y1="382" x2="280" y2="382" stroke="url(#gold)" stroke-width="1.5" opacity="0.4"/>
+</svg>

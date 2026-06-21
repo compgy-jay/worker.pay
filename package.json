@@ -4,13 +4,12 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:turbo": "next dev --turbo",
     "build": "next build",
-    "start": "node .next/standalone/server.js",
-    "lint": "eslint",
-    "standalone": "npm run build && node .next/standalone/server.js",
-    "package:unix": "bash portable/package.sh",
-    "package:win": "portable\\package.bat",
-    "dist": "npm run build && bash portable/package.sh"
+    "start": "next start",
+    "start:dev": "npm run dev",
+    "start:prod": "npm run build && npm run start",
+    "lint": "eslint"
   },
   "dependencies": {
     "@fontsource/noto-serif-sc": "^5.2.9",
@@ -34,7 +33,6 @@
     "typescript": "^5"
   },
   "description": "ProjectHub - Professional project management and cost tracking system for managing teams, materials, budgets, and project resources.",
-  "main": "index.js",
   "keywords": [
     "project-management",
     "cost-tracking",

@@ -18,39 +18,29 @@ ProjectHub is a comprehensive project management system designed for project man
 
 ## 🚀 Quick Start
 
-### Installation & Development
-
 ```bash
-# Clone and install
-cd project-hub
-npm install
+# One-command start (development mode, hot reload)
+./start.sh
+```
 
-# Start development server
+Or manually:
+```bash
+npm install
 npm run dev
 ```
 
-Access the application at `http://localhost:3000`. The app is fully functional with test data immediately available.
+Open [http://localhost:3000](http://localhost:3000) — **Login: Admin / newday**
 
-### Production Deployment
+### Production build
 
 ```bash
-# Verify code quality
-npm run lint
-
-# Build optimized version
-npm run build
-
-# Start production server
-npm run start
+./start.sh --prod
 ```
+or `npm run start:prod`
 
-## 📋 System Requirements
+## 📋 Requirements
 
-- **Node.js**: 18.x or later
-- **Package Manager**: npm 9+ or yarn 3+
-- **Disk Space**: Minimum 100MB (includes Node modules, database, and logs)
-- **OS**: Windows, macOS, or Linux
-- **Browser**: Modern browser with ES2020 support (Chrome, Firefox, Safari, Edge)
+- **Node.js** 18+ · **npm** 9+ · **OS**: Windows, macOS, or Linux
 
 ## 📚 Documentation
 

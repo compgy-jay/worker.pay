@@ -5,6 +5,8 @@ import gsap from "gsap";
 import { useEntranceAnimation, useCountUp } from "@/hooks/useEntranceAnimation";
 import { downloadCsv, formatDate, formatMoney, mondayISO, toQueryString, todayISO } from "@/lib/format";
 import DashboardHero from "@/components/DashboardHero";
+import LoginScreen from "@/components/LoginScreen";
+import { useAuth } from "@/lib/auth-context";
 import type {
   Material,
   MaterialFilters,
@@ -18,6 +20,44 @@ import type {
 
 type Tab = "dashboard" | "workers" | "wages" | "materials" | "settings";
 type Notice = { type: "success" | "error"; message: string } | null;
+
+const tabIcons: Record<Tab, React.ReactNode> = {
+  dashboard: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="3" width="7" height="7" rx="1" />
+      <rect x="14" y="3" width="7" height="7" rx="1" />
+      <rect x="3" y="14" width="7" height="7" rx="1" />
+      <rect x="14" y="14" width="7" height="7" rx="1" />
+    </svg>
+  ),
+  workers: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+      <circle cx="9" cy="7" r="4" />
+      <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+      <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+    </svg>
+  ),
+  wages: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="12" y1="1" x2="12" y2="23" />
+      <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+    </svg>
+  ),
+  materials: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 2 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+      <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+      <line x1="12" y1="22.08" x2="12" y2="12" />
+    </svg>
+  ),
+  settings: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="3" />
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+    </svg>
+  ),
+};
 type WorkerDraft = { name: string; contact: string; department: string };
 type SalaryEdit = { week_start: string; amount: string; status: PayStatus };
 type MaterialDraft = {
@@ -177,6 +217,8 @@ function StatusBadge({ status }: { status: PayStatus }) {
 }
 
 export default function Home() {
+  const { admin, loading, logout } = useAuth();
+  const [showLogout, setShowLogout] = useState(false);
 
   const [tab, setTab] = useState<Tab>("dashboard");
   const [booting, setBooting] = useState(true);
@@ -217,6 +259,30 @@ export default function Home() {
 
   const mainRef = useEntranceAnimation([tab, booting]);
   const contentRef = useRef<HTMLDivElement>(null);
+
+  const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const [indicator, setIndicator] = useState({ left: 0, width: 0 });
+
+  const tabs = useMemo<{ key: Tab; label: string }[]>(() => [
+    { key: "dashboard", label: "Dashboard" },
+    { key: "workers", label: "Workers" },
+    { key: "wages", label: "Wages" },
+    { key: "materials", label: "Materials" },
+    { key: "settings", label: "Settings" },
+  ], []);
+
+  useEffect(() => {
+    const updateIndicator = () => {
+      const idx = tabs.findIndex((t) => t.key === tab);
+      const el = tabRefs.current[idx];
+      if (el) {
+        setIndicator({ left: el.offsetLeft, width: el.offsetWidth });
+      }
+    };
+    updateIndicator();
+    window.addEventListener("resize", updateIndicator);
+    return () => window.removeEventListener("resize", updateIndicator);
+  }, [tab, tabs]);
 
   useEffect(() => {
     if (!contentRef.current || booting) return;
@@ -621,13 +687,20 @@ export default function Home() {
     ]);
   };
 
-  const tabs: { key: Tab; label: string }[] = [
-    { key: "dashboard", label: "Dashboard" },
-    { key: "workers", label: "Workers" },
-    { key: "wages", label: "Wages" },
-    { key: "materials", label: "Materials" },
-    { key: "settings", label: "Settings" },
-  ];
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-bg-deep">
+        <div className="flex flex-col items-center gap-3">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-amber border-t-transparent" />
+          <p className="text-sm text-ink-muted">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!admin) {
+    return <LoginScreen />;
+  }
 
   return (
     <div ref={mainRef} className="min-h-screen bg-bg-deep text-ink">
@@ -644,19 +717,53 @@ export default function Home() {
         onPrint={() => window.print()}
       />
 
-      <div className="border-b border-border-subtle bg-bg-bg-card/50 backdrop-blur-sm">
-        <div className="mx-auto flex max-w-7xl px-6">
-          <nav className="flex gap-1">
-            {tabs.map((item) => (
+      <div className="sticky top-[57px] z-20 border-b border-border-subtle bg-bg-surface/80 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-7xl items-center overflow-x-auto px-6 scrollbar-none">
+          <nav className="tab-bar shrink-0">
+            {tabs.map((item, i) => (
               <button
                 key={item.key}
+                ref={(el) => { tabRefs.current[i] = el; }}
                 className={`tab-button ${tab === item.key ? "tab-button-active" : ""}`}
                 onClick={() => setTab(item.key)}
               >
-                {item.label}
+                {tabIcons[item.key]}
+                <span>{item.label}</span>
               </button>
             ))}
+            <div className="tab-indicator" style={{ left: indicator.left, width: indicator.width }} />
           </nav>
+          <div className="ml-auto flex shrink-0 items-center gap-3 pl-4">
+            <div className="flex items-center gap-2 text-xs text-ink-muted">
+              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-amber/20 text-[10px] font-bold text-amber">
+                {admin?.name?.charAt(0)?.toUpperCase() || "A"}
+              </span>
+              <span className="hidden sm:inline">{admin?.name || "Admin"}</span>
+            </div>
+            <div className="relative">
+              <button
+                className="rounded-md px-2 py-1 text-xs text-ink-muted transition-colors hover:bg-amber/10 hover:text-amber"
+                onClick={() => setShowLogout(!showLogout)}
+              >
+                Logout
+              </button>
+              {showLogout && (
+                <>
+                  <div className="fixed inset-0 z-10" onClick={() => setShowLogout(false)} />
+                  <div className="absolute right-0 top-full z-20 mt-1 w-48 rounded-lg border border-border-subtle bg-bg-elevated p-3 shadow-xl">
+                    <p className="mb-1 text-xs text-ink-muted">Signed in as</p>
+                    <p className="mb-3 text-sm font-medium text-ink">{admin?.name || "Admin"}</p>
+                    <button
+                      className="w-full rounded-md bg-red-500/10 px-3 py-1.5 text-sm text-red-400 transition-colors hover:bg-red-500/20"
+                      onClick={() => { logout(); setShowLogout(false); }}
+                    >
+                      Sign out
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
         </div>
       </div>
 
@@ -1220,6 +1327,33 @@ export default function Home() {
                 </div>
 
                 <div className="panel p-5" data-animate>
+                  <SectionTitle eyebrow="Account" title="Account Settings" />
+                  <div className="mt-4 space-y-4">
+                    <div className="grid gap-3 md:grid-cols-3">
+                      <div>
+                        <p className="text-xs text-ink-muted">Name</p>
+                        <p className="text-sm font-medium text-ink">{admin?.name || "-"}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-ink-muted">Phone</p>
+                        <p className="text-sm font-medium text-ink">{admin?.phone || "-"}</p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-ink-muted">Email</p>
+                        <p className="text-sm font-medium text-ink">{admin?.email || "-"}</p>
+                      </div>
+                    </div>
+
+                    <details className="rounded-lg border border-border-subtle bg-bg-deep/30">
+                      <summary className="cursor-pointer px-4 py-2 text-sm font-medium text-ink-muted transition hover:text-ink">
+                        Change password
+                      </summary>
+                      <PasswordChangeForm adminId={admin?.id} notify={notify} />
+                    </details>
+                  </div>
+                </div>
+
+                <div className="panel p-5" data-animate>
                   <SectionTitle eyebrow="Administration" title="Admin Management" />
                   <div className="mt-4">
                     <AdminPanel />
@@ -1363,6 +1497,49 @@ function AdminPanel() {
           <button className="primary-button" disabled={busy} onClick={handleReset}>Reset Password</button>
         </div>
       </details>
+    </div>
+  );
+}
+
+function PasswordChangeForm({ adminId, notify }: { adminId?: number; notify: (type: "success" | "error", message: string) => void }) {
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState("");
+
+  const handleChange = async () => {
+    if (!currentPassword || !newPassword) { setMsg("Fill in all fields"); return; }
+    if (newPassword.length < 4) { setMsg("New password must be at least 4 characters"); return; }
+    if (newPassword !== confirmPassword) { setMsg("Passwords do not match"); return; }
+    setBusy(true);
+    setMsg("");
+    try {
+      const res = await fetch("/api/auth/change-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ adminId, currentPassword, newPassword }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setCurrentPassword(""); setNewPassword(""); setConfirmPassword("");
+        notify("success", "Password changed successfully");
+      } else {
+        setMsg(data.error || "Failed to change password");
+      }
+    } catch { setMsg("Network error"); }
+    setBusy(false);
+  };
+
+  return (
+    <div className="grid gap-3 p-4 md:grid-cols-[1fr_1fr_1fr_auto]">
+      <input className="control" type="password" placeholder="Current password" value={currentPassword} onChange={(e) => { setCurrentPassword(e.target.value); setMsg(""); }} disabled={busy} />
+      <input className="control" type="password" placeholder="New password" value={newPassword} onChange={(e) => { setNewPassword(e.target.value); setMsg(""); }} disabled={busy} />
+      <input className="control" type="password" placeholder="Confirm new password" value={confirmPassword} onChange={(e) => { setConfirmPassword(e.target.value); setMsg(""); }} disabled={busy} />
+      <button className="primary-button" disabled={busy} onClick={handleChange}>
+        {busy ? "Changing..." : "Save"}
+      </button>
+      {msg && <div className="col-span-full rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-400">{msg}</div>}
     </div>
   );
 }

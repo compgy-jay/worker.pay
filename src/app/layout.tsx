@@ -5,6 +5,10 @@ import Providers from "@/components/Providers";
 export const metadata: Metadata = {
   title: "ProjectHub — Project Management & Cost Tracking",
   description: "Manage your projects efficiently with ProjectHub. Track team members, labor costs, materials, budgets, and generate financial reports.",
+  icons: {
+    icon: "/logo.svg",
+    apple: "/logo.svg",
+  },
 };
 
 export default function RootLayout({
