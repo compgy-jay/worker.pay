@@ -31,7 +31,7 @@ async function initDb() {
 
     CREATE TABLE IF NOT EXISTS project_settings (
       id INTEGER PRIMARY KEY CHECK (id = 1),
-      project_name TEXT DEFAULT 'House Project',
+      project_name TEXT DEFAULT 'Site Project',
       pm_name TEXT DEFAULT '',
       pm_contact TEXT DEFAULT '',
       foreman_name TEXT DEFAULT '',

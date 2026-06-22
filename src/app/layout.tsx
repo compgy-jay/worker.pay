@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "ProjectHub — Project Management & Cost Tracking",
-  description: "Manage your projects efficiently with ProjectHub. Track team members, labor costs, materials, budgets, and generate financial reports.",
+  title: "Pulse — Project Management & Cost Tracking",
+  description: "Manage your projects efficiently with Pulse. Track team members, labor costs, materials, budgets, and generate financial reports.",
   icons: {
     icon: "/logo.svg",
     apple: "/logo.svg",
@@ -27,22 +27,22 @@ export default function RootLayout({
                 </svg>
               </div>
               <div>
-                <h1 className="text-lg font-bold tracking-tight text-ink">ProjectHub</h1>
-                <p className="text-[10px] font-medium uppercase tracking-[0.15em] text-ink-muted">Project Management</p>
+                <h1 className="text-lg font-bold tracking-tight text-ink">Pulse</h1>
+                <p className="text-[10px] font-medium uppercase tracking-[0.15em] text-ink-muted">Construction Management</p>
               </div>
             </div>
-            <p className="hidden text-sm text-ink-muted md:block">Professional Project Management Platform</p>
+            <p className="hidden text-sm text-ink-muted md:block">Integrated Construction Management Platform</p>
           </div>
         </header>
         <main className="flex-1">{children}</main>
         <footer className="border-t border-border-subtle bg-bg-surface">
           <div className="mx-auto max-w-7xl px-6 py-8 text-center">
             <p className="text-sm text-ink-muted">
-              ProjectHub &copy; {new Date().getFullYear()} &middot;{" "}
-              <span className="font-semibold text-amber">Professional Project Management</span>
+              Pulse &copy; {new Date().getFullYear()} &middot;{" "}
+              <span className="font-semibold text-amber">Construction Project Management</span>
             </p>
             <p className="mt-1 text-xs text-ink-muted/60">
-              Efficiently manage teams, track costs, and optimize resources
+              Manage teams, track costs, and deliver on time and on budget
             </p>
           </div>
         </footer>
