@@ -21,7 +21,7 @@ export default function RootLayout({
         <header className="sticky top-0 z-30 border-b border-border-subtle bg-bg-deep/80 backdrop-blur-xl">
           <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3">
             <div className="flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-amber to-amber-light shadow-lg shadow-amber/20">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-orange to-orange-light shadow-lg shadow-orange/20">
                 <svg className="h-5 w-5 text-bg-deep" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                 </svg>
@@ -39,7 +39,7 @@ export default function RootLayout({
           <div className="mx-auto max-w-7xl px-6 py-8 text-center">
             <p className="text-sm text-ink-muted">
               Pulse &copy; {new Date().getFullYear()} &middot;{" "}
-              <span className="font-semibold text-amber">Construction Project Management</span>
+              <span className="font-semibold text-orange">Construction Project Management</span>
             </p>
             <p className="mt-1 text-xs text-ink-muted/60">
               Manage teams, track costs, and deliver on time and on budget

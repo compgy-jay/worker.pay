@@ -46,8 +46,8 @@ export default function DashboardHero({
         <div className="flex items-start justify-between gap-4">
           <div className="flex flex-col gap-2">
           <div className="flex items-center gap-2">
-            <span className="inline-block h-2 w-2 rounded-full bg-amber shadow-[0_0_8px_rgba(200,168,78,0.5)]" />
-            <span className="text-xs font-semibold uppercase tracking-[0.22em] text-amber">
+            <span className="inline-block h-2 w-2 rounded-full bg-orange shadow-[0_0_8px_rgba(249,115,22,0.5)]" />
+            <span className="text-xs font-semibold uppercase tracking-[0.22em] text-orange">
               Project Management
             </span>
           </div>

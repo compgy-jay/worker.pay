@@ -5,19 +5,19 @@
 @import "@fontsource/noto-serif-sc/700.css";
 
 :root {
-  --bg-deep: #0a0a12;
-  --bg-surface: #12121e;
-  --bg-card: #1a1a2e;
-  --bg-elevated: #22223a;
-  --ink: #f0ede8;
-  --ink-muted: #8a8a9a;
-  --amber: #c8a84e;
-  --amber-glow: rgba(200, 168, 78, 0.15);
-  --amber-light: #e0c06e;
-  --border-subtle: rgba(200, 168, 78, 0.12);
-  --border-active: rgba(200, 168, 78, 0.35);
-  --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.4), 0 1px 3px rgba(0, 0, 0, 0.3);
-  --shadow-glow: 0 0 20px rgba(200, 168, 78, 0.08);
+  --bg-deep: #050a18;
+  --bg-surface: #0b1428;
+  --bg-card: #111d38;
+  --bg-elevated: #172845;
+  --ink: #f2f6fa;
+  --ink-muted: #8a9fc0;
+  --orange: #f97316;
+  --orange-glow: rgba(249, 115, 22, 0.15);
+  --orange-light: #fb923c;
+  --border-subtle: rgba(249, 115, 22, 0.12);
+  --border-active: rgba(249, 115, 22, 0.35);
+  --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.5), 0 1px 3px rgba(0, 0, 0, 0.4);
+  --shadow-glow: 0 0 20px rgba(249, 115, 22, 0.1);
 }
 
 @theme inline {
@@ -27,8 +27,9 @@
   --color-bg-elevated: var(--bg-elevated);
   --color-ink: var(--ink);
   --color-ink-muted: var(--ink-muted);
-  --color-amber: var(--amber);
-  --color-amber-light: var(--amber-light);
+  --color-orange: var(--orange);
+  --color-orange-light: var(--orange-light);
+  --color-white: #ffffff;
   --color-border-subtle: var(--border-subtle);
   --color-border-active: var(--border-active);
   --font-sans: "Outfit", ui-sans-serif, system-ui, sans-serif;
@@ -46,14 +47,14 @@ body {
   overflow-x: hidden;
 }
 
-::selection { background: rgba(200, 168, 78, 0.3); color: var(--ink); }
+::selection { background: rgba(249, 115, 22, 0.3); color: var(--ink); }
 
 button, input, select { font: inherit; }
 
 button:focus-visible,
 input:focus-visible,
 select:focus-visible {
-  outline: 2px solid var(--amber);
+  outline: 2px solid var(--orange);
   outline-offset: 2px;
 }
 
@@ -68,9 +69,9 @@ select:focus-visible {
   position: absolute;
   inset: -50%;
   background:
-    radial-gradient(ellipse 60% 50% at 20% 30%, rgba(200, 168, 78, 0.08) 0%, transparent 70%),
-    radial-gradient(ellipse 50% 60% at 80% 70%, rgba(200, 168, 78, 0.05) 0%, transparent 70%),
-    radial-gradient(ellipse 40% 40% at 50% 50%, rgba(200, 168, 78, 0.03) 0%, transparent 60%);
+    radial-gradient(ellipse 60% 50% at 20% 30%, rgba(249, 115, 22, 0.08) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 60% at 80% 70%, rgba(249, 115, 22, 0.05) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 40% at 50% 50%, rgba(249, 115, 22, 0.03) 0%, transparent 60%);
   animation: gradientShift 12s ease-in-out infinite alternate;
 }
 
@@ -85,7 +86,7 @@ select:focus-visible {
   width: 600px;
   height: 600px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(200, 168, 78, 0.06) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(249, 115, 22, 0.06) 0%, transparent 70%);
   pointer-events: none;
   animation: glowPulse 6s ease-in-out infinite alternate;
 }
@@ -99,8 +100,8 @@ select:focus-visible {
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(rgba(200, 168, 78, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(200, 168, 78, 0.03) 1px, transparent 1px);
+    linear-gradient(rgba(249, 115, 22, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(249, 115, 22, 0.03) 1px, transparent 1px);
   background-size: 60px 60px;
   mask-image: radial-gradient(ellipse 60% 50% at center, black 30%, transparent 70%);
   -webkit-mask-image: radial-gradient(ellipse 60% 50% at center, black 30%, transparent 70%);
@@ -149,8 +150,8 @@ select:focus-visible {
 }
 
 .control:focus {
-  border-color: var(--amber);
-  box-shadow: 0 0 0 3px var(--amber-glow);
+  border-color: var(--orange);
+  box-shadow: 0 0 0 3px var(--orange-glow);
 }
 
 .control::placeholder { color: var(--ink-muted); }
@@ -183,13 +184,13 @@ select.control option {
 }
 
 .primary-button {
-  border: 1px solid var(--amber);
-  background: linear-gradient(135deg, var(--amber) 0%, var(--amber-light) 100%);
-  color: var(--bg-deep);
+  border: 1px solid var(--orange);
+  background: linear-gradient(135deg, var(--orange) 0%, var(--orange-light) 100%);
+  color: #ffffff;
 }
 
 .primary-button:hover {
-  box-shadow: 0 0 20px var(--amber-glow);
+  box-shadow: 0 0 20px var(--orange-glow);
   transform: translateY(-1px);
 }
 
@@ -210,13 +211,13 @@ select.control option {
 }
 
 .text-button, .danger-text-button {
-  color: var(--amber);
+  color: var(--orange);
   font-size: 0.8125rem;
   font-weight: 600;
   transition: color 0.2s ease;
 }
 
-.text-button:hover { color: var(--amber-light); }
+.text-button:hover { color: var(--orange-light); }
 
 .danger-text-button { color: #ef4444; }
 .danger-text-button:hover { color: #f87171; }
@@ -253,7 +254,7 @@ select.control option {
 
 .tab-button:hover {
   color: var(--ink);
-  background: rgba(200, 168, 78, 0.04);
+  background: rgba(249, 115, 22, 0.04);
 }
 
 .tab-button:hover svg {
@@ -261,13 +262,13 @@ select.control option {
 }
 
 .tab-button:focus-visible {
-  outline: 2px solid var(--amber);
+  outline: 2px solid var(--orange);
   outline-offset: -2px;
   border-radius: 4px;
 }
 
 .tab-button-active {
-  color: var(--amber);
+  color: var(--orange);
   font-weight: 600;
 }
 
@@ -276,16 +277,16 @@ select.control option {
 }
 
 .tab-button-active:hover {
-  background: rgba(200, 168, 78, 0.08);
+  background: rgba(249, 115, 22, 0.08);
 }
 
 .tab-indicator {
   position: absolute;
   bottom: 0;
   height: 2px;
-  background: linear-gradient(90deg, var(--amber) 0%, var(--amber-light) 100%);
+  background: linear-gradient(90deg, var(--orange) 0%, var(--orange-light) 100%);
   border-radius: 1px;
-  box-shadow: 0 0 10px var(--amber-glow), 0 0 20px var(--amber-glow);
+  box-shadow: 0 0 10px var(--orange-glow), 0 0 20px var(--orange-glow);
   transition: left 0.35s cubic-bezier(0.4, 0, 0.2, 1), width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 1;
   pointer-events: none;
@@ -372,8 +373,8 @@ select.control option {
 .progress-bar {
   height: 100%;
   border-radius: 999px;
-  background: linear-gradient(90deg, var(--amber) 0%, var(--amber-light) 100%);
-  box-shadow: 0 0 8px rgba(200, 168, 78, 0.3);
+  background: linear-gradient(90deg, var(--orange) 0%, var(--orange-light) 100%);
+  box-shadow: 0 0 8px rgba(249, 115, 22, 0.3);
 }
 
 .progress-over { background: linear-gradient(90deg, #ef4444 0%, #f87171 100%); }
@@ -435,8 +436,8 @@ select.control option {
   position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(rgba(200, 168, 78, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(200, 168, 78, 0.04) 1px, transparent 1px);
+    linear-gradient(rgba(249, 115, 22, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(249, 115, 22, 0.04) 1px, transparent 1px);
   background-size: 80px 80px;
   mask-image: radial-gradient(ellipse 50% 40% at center, black 25%, transparent 65%);
   -webkit-mask-image: radial-gradient(ellipse 50% 40% at center, black 25%, transparent 65%);
@@ -619,12 +620,12 @@ select.control option {
 
 .pill-nav a:hover {
   color: var(--ink);
-  background: rgba(200, 168, 78, 0.08);
+  background: rgba(249, 115, 22, 0.08);
 }
 
 .pill-nav a.active {
-  color: var(--bg-deep);
-  background: var(--amber);
+  color: #ffffff;
+  background: var(--orange);
   font-weight: 600;
 }
 
