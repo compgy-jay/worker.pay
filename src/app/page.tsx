@@ -5,8 +5,6 @@ import gsap from "gsap";
 import { useEntranceAnimation, useCountUp } from "@/hooks/useEntranceAnimation";
 import { downloadCsv, formatDate, formatMoney, mondayISO, toQueryString, todayISO } from "@/lib/format";
 import DashboardHero from "@/components/DashboardHero";
-import LoginScreen from "@/components/LoginScreen";
-import { useAuth } from "@/lib/auth-context";
 import type {
   Material,
   MaterialFilters,
@@ -217,9 +215,6 @@ function StatusBadge({ status }: { status: PayStatus }) {
 }
 
 export default function Home() {
-  const { admin, loading, logout } = useAuth();
-  const [showLogout, setShowLogout] = useState(false);
-
   const [tab, setTab] = useState<Tab>("dashboard");
   const [booting, setBooting] = useState(true);
   const [notice, setNotice] = useState<Notice>(null);
@@ -687,21 +682,6 @@ export default function Home() {
     ]);
   };
 
-  if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-bg-deep">
-        <div className="flex flex-col items-center gap-3">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-amber border-t-transparent" />
-          <p className="text-sm text-ink-muted">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!admin) {
-    return <LoginScreen />;
-  }
-
   return (
     <div ref={mainRef} className="min-h-screen bg-bg-deep text-ink">
       {notice && (
@@ -733,37 +713,7 @@ export default function Home() {
             ))}
             <div className="tab-indicator" style={{ left: indicator.left, width: indicator.width }} />
           </nav>
-          <div className="ml-auto flex shrink-0 items-center gap-3 pl-4">
-            <div className="flex items-center gap-2 text-xs text-ink-muted">
-              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-amber/20 text-[10px] font-bold text-amber">
-                {admin?.name?.charAt(0)?.toUpperCase() || "A"}
-              </span>
-              <span className="hidden sm:inline">{admin?.name || "Admin"}</span>
-            </div>
-            <div className="relative">
-              <button
-                className="rounded-md px-2 py-1 text-xs text-ink-muted transition-colors hover:bg-amber/10 hover:text-amber"
-                onClick={() => setShowLogout(!showLogout)}
-              >
-                Logout
-              </button>
-              {showLogout && (
-                <>
-                  <div className="fixed inset-0 z-10" onClick={() => setShowLogout(false)} />
-                  <div className="absolute right-0 top-full z-20 mt-1 w-48 rounded-lg border border-border-subtle bg-bg-elevated p-3 shadow-xl">
-                    <p className="mb-1 text-xs text-ink-muted">Signed in as</p>
-                    <p className="mb-3 text-sm font-medium text-ink">{admin?.name || "Admin"}</p>
-                    <button
-                      className="w-full rounded-md bg-red-500/10 px-3 py-1.5 text-sm text-red-400 transition-colors hover:bg-red-500/20"
-                      onClick={() => { logout(); setShowLogout(false); }}
-                    >
-                      Sign out
-                    </button>
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
+
         </div>
       </div>
 
@@ -1327,40 +1277,6 @@ export default function Home() {
                 </div>
 
                 <div className="panel p-5" data-animate>
-                  <SectionTitle eyebrow="Account" title="Account Settings" />
-                  <div className="mt-4 space-y-4">
-                    <div className="grid gap-3 md:grid-cols-3">
-                      <div>
-                        <p className="text-xs text-ink-muted">Name</p>
-                        <p className="text-sm font-medium text-ink">{admin?.name || "-"}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-ink-muted">Phone</p>
-                        <p className="text-sm font-medium text-ink">{admin?.phone || "-"}</p>
-                      </div>
-                      <div>
-                        <p className="text-xs text-ink-muted">Email</p>
-                        <p className="text-sm font-medium text-ink">{admin?.email || "-"}</p>
-                      </div>
-                    </div>
-
-                    <details className="rounded-lg border border-border-subtle bg-bg-deep/30">
-                      <summary className="cursor-pointer px-4 py-2 text-sm font-medium text-ink-muted transition hover:text-ink">
-                        Change password
-                      </summary>
-                      <PasswordChangeForm adminId={admin?.id} notify={notify} />
-                    </details>
-                  </div>
-                </div>
-
-                <div className="panel p-5" data-animate>
-                  <SectionTitle eyebrow="Administration" title="Admin Management" />
-                  <div className="mt-4">
-                    <AdminPanel />
-                  </div>
-                </div>
-
-                <div className="panel p-5" data-animate>
                   <SectionTitle eyebrow="Notifications" title="Send Notification" />
                   <div className="mt-4">
                     <NotificationSender />
@@ -1371,175 +1287,6 @@ export default function Home() {
           </div>
         )}
       </main>
-    </div>
-  );
-}
-
-interface AdminUser {
-  id: number;
-  name: string;
-  phone: string;
-  email: string;
-  role: string;
-}
-
-function AdminPanel() {
-  const [admins, setAdmins] = useState<AdminUser[]>([]);
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [resetPhone, setResetPhone] = useState("");
-  const [resetPassword, setResetPassword] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [msg, setMsg] = useState("");
-
-  const refresh = useCallback(async () => {
-    const res = await fetch("/api/auth/admins");
-    if (res.ok) setAdmins(await res.json());
-  }, []);
-
-  useEffect(() => { refresh(); }, [refresh]);
-
-  const addAdmin = async () => {
-    if (!name.trim() || !password) { setMsg("Name and password required"); return; }
-    setBusy(true);
-    const res = await fetch("/api/auth/admins", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: name.trim(), phone: phone.trim(), email: email.trim(), password }),
-    });
-    setBusy(false);
-    if (res.ok) {
-      setName(""); setPhone(""); setEmail(""); setPassword("");
-      setMsg("Admin added");
-      refresh();
-    } else {
-      const data = await res.json();
-      setMsg(data.error || "Failed to add admin");
-    }
-  };
-
-  const deleteAdmin = async (id: number) => {
-    if (!confirm("Remove this admin?")) return;
-    const res = await fetch(`/api/auth/admins/${id}`, { method: "DELETE" });
-    if (res.ok) { setMsg("Admin removed"); refresh(); }
-    else { const data = await res.json(); setMsg(data.error || "Failed to remove"); }
-  };
-
-  const handleReset = async () => {
-    if (!resetPhone || !resetPassword) { setMsg("Phone and new password required"); return; }
-    setBusy(true);
-    const res = await fetch("/api/auth/reset-password", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ phone: resetPhone.trim(), newPassword: resetPassword }),
-    });
-    setBusy(false);
-    const data = await res.json();
-    setMsg(data.message || data.error || "Done");
-  };
-
-  return (
-    <div className="space-y-4">
-      {msg && (
-        <div className="rounded-lg border border-amber/20 bg-amber/5 px-3 py-2 text-sm text-amber">
-          {msg}
-        </div>
-      )}
-
-      <div className="grid gap-3 md:grid-cols-[1fr_1fr_1fr_1.2fr_auto]">
-        <input className="control" placeholder="Name" value={name} onChange={(e) => setName(e.target.value)} />
-        <input className="control" placeholder="Phone" value={phone} onChange={(e) => setPhone(e.target.value)} />
-        <input className="control" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
-        <input className="control" type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} />
-        <button className="primary-button" disabled={busy} onClick={addAdmin}>Add Admin</button>
-      </div>
-
-      {admins.length > 0 && (
-        <div className="panel table-shell mt-4">
-          <table className="data-table">
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Phone</th>
-                <th>Email</th>
-                <th>Role</th>
-                <th className="text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {admins.map((a) => (
-                <tr key={a.id}>
-                  <td className="font-medium text-ink">{a.name}</td>
-                  <td>{a.phone || "-"}</td>
-                  <td>{a.email || "-"}</td>
-                  <td><span className="status-pill status-paid">{a.role}</span></td>
-                  <td className="table-actions">
-                    {a.role !== "superadmin" && (
-                      <button className="danger-text-button" onClick={() => deleteAdmin(a.id)}>Remove</button>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      <details className="mt-4 rounded-lg border border-border-subtle bg-bg-deep/30">
-        <summary className="cursor-pointer px-4 py-2 text-sm font-medium text-ink-muted hover:text-ink transition">
-          Reset password via phone
-        </summary>
-        <div className="grid gap-3 p-4 md:grid-cols-[1fr_1fr_auto]">
-          <input className="control" placeholder="Admin phone number" value={resetPhone} onChange={(e) => setResetPhone(e.target.value)} />
-          <input className="control" type="password" placeholder="New password" value={resetPassword} onChange={(e) => setResetPassword(e.target.value)} />
-          <button className="primary-button" disabled={busy} onClick={handleReset}>Reset Password</button>
-        </div>
-      </details>
-    </div>
-  );
-}
-
-function PasswordChangeForm({ adminId, notify }: { adminId?: number; notify: (type: "success" | "error", message: string) => void }) {
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [msg, setMsg] = useState("");
-
-  const handleChange = async () => {
-    if (!currentPassword || !newPassword) { setMsg("Fill in all fields"); return; }
-    if (newPassword.length < 4) { setMsg("New password must be at least 4 characters"); return; }
-    if (newPassword !== confirmPassword) { setMsg("Passwords do not match"); return; }
-    setBusy(true);
-    setMsg("");
-    try {
-      const res = await fetch("/api/auth/change-password", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ adminId, currentPassword, newPassword }),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        setCurrentPassword(""); setNewPassword(""); setConfirmPassword("");
-        notify("success", "Password changed successfully");
-      } else {
-        setMsg(data.error || "Failed to change password");
-      }
-    } catch { setMsg("Network error"); }
-    setBusy(false);
-  };
-
-  return (
-    <div className="grid gap-3 p-4 md:grid-cols-[1fr_1fr_1fr_auto]">
-      <input className="control" type="password" placeholder="Current password" value={currentPassword} onChange={(e) => { setCurrentPassword(e.target.value); setMsg(""); }} disabled={busy} />
-      <input className="control" type="password" placeholder="New password" value={newPassword} onChange={(e) => { setNewPassword(e.target.value); setMsg(""); }} disabled={busy} />
-      <input className="control" type="password" placeholder="Confirm new password" value={confirmPassword} onChange={(e) => { setConfirmPassword(e.target.value); setMsg(""); }} disabled={busy} />
-      <button className="primary-button" disabled={busy} onClick={handleChange}>
-        {busy ? "Changing..." : "Save"}
-      </button>
-      {msg && <div className="col-span-full rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-400">{msg}</div>}
     </div>
   );
 }

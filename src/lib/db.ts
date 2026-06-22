@@ -1,5 +1,4 @@
 import { createClient } from '@libsql/client';
-import { hashPassword } from "@/lib/auth";
 
 const url = process.env.DATABASE_URL || 'file:local.db';
 const authToken = process.env.DATABASE_AUTH_TOKEN || '';
@@ -61,16 +60,6 @@ async function initDb() {
     CREATE INDEX IF NOT EXISTS idx_salary_records_week_start ON salary_records(week_start);
     CREATE INDEX IF NOT EXISTS idx_materials_date ON materials(date);
 
-    CREATE TABLE IF NOT EXISTS admins (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL DEFAULT '',
-      phone TEXT NOT NULL DEFAULT '',
-      email TEXT NOT NULL DEFAULT '',
-      password_hash TEXT NOT NULL,
-      role TEXT NOT NULL DEFAULT 'admin',
-      created_at TEXT DEFAULT (datetime('now'))
-    );
-
     CREATE TABLE IF NOT EXISTS notification_log (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       channel TEXT NOT NULL,
@@ -83,19 +72,11 @@ async function initDb() {
   `);
 }
 
-async function seedAdmin() {
-  const { rows } = await db.execute("SELECT COUNT(*) as c FROM admins");
-  if ((rows[0] as unknown as { c: number }).c === 0) {
-    await db.execute(
-      `INSERT INTO admins (name, phone, email, password_hash, role) VALUES (?, ?, ?, ?, ?)`,
-      ["Admin", "0795351158", "admin@worker-pay.com", hashPassword("newday"), "superadmin"]
-    );
-  }
-}
-
 const ready = initDb()
-  .then(() => seedAdmin())
-  .catch(console.error);
+  .catch((e) => {
+    console.error("Database initialization failed:", e);
+    throw e;
+  });
 
 export async function waitReady() {
   await ready;
