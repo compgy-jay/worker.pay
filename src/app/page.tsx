@@ -724,8 +724,6 @@ export default function Home() {
           <div ref={contentRef}>
             {tab === "dashboard" && (
               <section className="flex flex-col gap-6">
-                <SectionTitle eyebrow="Dashboard" title="Project Health & Metrics" />
-
                 <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4" data-animate>
                   <MetricCard label="Total Spend" value={money(summary.grandTotal)} detail="Labor + Materials" tone="blue" countKey={summary.grandTotal} />
                   <MetricCard label="Outstanding Labor" value={money(summary.unpaidTotal)} detail={`${summary.unpaidRecordCount} pending`} tone="red" countKey={summary.unpaidTotal} />
@@ -733,20 +731,25 @@ export default function Home() {
                   <MetricCard label="Team Size" value={String(summary.workerCount)} detail={`${departments.length || 0} department(s)`} tone="green" countKey={summary.workerCount} />
                 </div>
 
-                <div className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr]" data-animate>
+                <div className="grid gap-4 lg:grid-cols-[1.4fr_1fr]" data-animate>
                   <div className="panel p-5">
-                    <div className="flex flex-wrap items-center justify-between gap-3">
-                      <div>
-                        <h3 className="text-lg font-semibold text-ink">Budget Overview</h3>
-                        <p className="text-sm text-ink-muted">
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-2">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber/10">
+                          <svg className="h-4 w-4 text-amber" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                            <line x1="12" y1="1" x2="12" y2="23" />
+                            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                          </svg>
+                        </div>
+                        <h3 className="text-lg font-semibold text-ink">Budget Utilization</h3>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-semibold text-ink-muted">
                           {summary.budget > 0
-                            ? `${money(summary.budgetRemaining)} of ${money(summary.budget)} remaining`
-                            : "Set a budget in Settings to track project spending"}
+                            ? `${summary.budgetUsedPercent.toFixed(1)}% spent`
+                            : "No budget set"}
                         </p>
                       </div>
-                      <span className="text-sm font-semibold text-ink-muted">
-                        {summary.budget > 0 ? `${summary.budgetUsedPercent.toFixed(1)}% spent` : "No budget set"}
-                      </span>
                     </div>
                     <div className="progress-track mt-4">
                       <div
@@ -754,37 +757,88 @@ export default function Home() {
                         style={{ width: `${Math.min(summary.budgetUsedPercent, 100)}%` }}
                       />
                     </div>
+                    <div className="mt-2 flex items-center justify-between text-sm">
+                      <span className="text-ink-muted">
+                        {summary.budget > 0
+                          ? `${money(summary.budgetRemaining)} remaining`
+                          : "Set a budget in Settings"}
+                      </span>
+                      <span className="font-semibold text-ink">{summary.budget > 0 ? money(summary.budget) : "—"}</span>
+                    </div>
+
                     <div className="mt-5 grid gap-3 sm:grid-cols-3">
-                      <div className="rounded-md bg-bg-deep p-3">
-                        <p className="text-xs uppercase tracking-[0.12em] text-ink-muted">Paid</p>
+                      <div className="rounded-lg border border-border-subtle bg-bg-surface/50 p-3">
+                        <div className="flex items-center gap-2">
+                          <span className="inline-block h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.4)]" />
+                          <p className="text-xs uppercase tracking-[0.12em] text-ink-muted">Paid</p>
+                        </div>
                         <p className="mt-1 font-semibold text-emerald-400">{money(summary.paidTotal)}</p>
                       </div>
-                      <div className="rounded-md bg-bg-deep p-3">
-                        <p className="text-xs uppercase tracking-[0.12em] text-ink-muted">Pending</p>
+                      <div className="rounded-lg border border-border-subtle bg-bg-surface/50 p-3">
+                        <div className="flex items-center gap-2">
+                          <span className="inline-block h-2 w-2 rounded-full bg-rose-400 shadow-[0_0_6px_rgba(244,63,94,0.4)]" />
+                          <p className="text-xs uppercase tracking-[0.12em] text-ink-muted">Pending</p>
+                        </div>
                         <p className="mt-1 font-semibold text-rose-400">{money(summary.unpaidTotal)}</p>
                       </div>
-                      <div className="rounded-md bg-bg-deep p-3">
-                        <p className="text-xs uppercase tracking-[0.12em] text-ink-muted">Total Items</p>
+                      <div className="rounded-lg border border-border-subtle bg-bg-surface/50 p-3">
+                        <div className="flex items-center gap-2">
+                          <span className="inline-block h-2 w-2 rounded-full bg-ink-muted shadow-[0_0_6px_rgba(138,138,154,0.4)]" />
+                          <p className="text-xs uppercase tracking-[0.12em] text-ink-muted">Records</p>
+                        </div>
                         <p className="mt-1 font-semibold text-ink">{summary.recordCount + summary.materialCount}</p>
                       </div>
                     </div>
                   </div>
 
                   <div className="panel p-5">
-                    <h3 className="text-lg font-semibold text-ink">Quick Actions</h3>
-                    <div className="mt-4 grid gap-2">
-                      <button className="secondary-button justify-between" onClick={() => setTab("workers")}>
-                        <span>Manage Team</span>
-                        <span className="rounded bg-bg-deep px-2 py-1 text-xs font-semibold">{workers.length}</span>
-                      </button>
-                      <button className="secondary-button justify-between" onClick={() => setTab("materials")}>
-                        <span>Record Material</span>
-                        <span className="rounded bg-bg-deep px-2 py-1 text-xs font-semibold">{materials.length}</span>
-                      </button>
-                      <button className="secondary-button justify-between" onClick={() => setTab("settings")}>
-                        <span>Update Settings</span>
-                        <span className="rounded bg-bg-deep px-2 py-1 text-xs font-semibold">{currency}</span>
-                      </button>
+                    <div className="flex items-center gap-2">
+                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber/10">
+                        <svg className="h-4 w-4 text-amber" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                          <circle cx="9" cy="7" r="4" />
+                          <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                          <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                        </svg>
+                      </div>
+                      <h3 className="text-lg font-semibold text-ink">Team Overview</h3>
+                    </div>
+                    <div className="mt-4 flex flex-col gap-2">
+                      {departments.slice(0, 5).map((dept) => {
+                        const count = workers.filter((w) => w.department === dept).length;
+                        const pct = summary.workerCount > 0 ? (count / summary.workerCount) * 100 : 0;
+                        return (
+                          <div key={dept} className="flex items-center gap-3">
+                            <span className="w-24 truncate text-sm text-ink-muted">{dept}</span>
+                            <div className="progress-track flex-1">
+                              <div className="progress-bar" style={{ width: `${pct}%` }} />
+                            </div>
+                            <span className="w-8 text-right text-sm font-semibold text-ink">{count}</span>
+                          </div>
+                        );
+                      })}
+                      {departments.length === 0 && (
+                        <p className="text-sm text-ink-muted">No departments assigned yet.</p>
+                      )}
+                    </div>
+                    <div className="mt-5 border-t border-border-subtle pt-4">
+                      <div className="grid grid-cols-2 gap-2">
+                        <button className="secondary-button justify-center" onClick={() => setTab("workers")}>
+                          <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                            <line x1="12" y1="5" x2="12" y2="19" />
+                            <line x1="5" y1="12" x2="19" y2="12" />
+                          </svg>
+                          Add Member
+                        </button>
+                        <button className="secondary-button justify-center" onClick={() => setTab("materials")}>
+                          <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 2 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                            <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+                            <line x1="12" y1="22.08" x2="12" y2="12" />
+                          </svg>
+                          Add Material
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -792,45 +846,93 @@ export default function Home() {
                 <div className="grid gap-4 lg:grid-cols-2" data-animate>
                   <div className="panel p-5">
                     <div className="flex items-center justify-between gap-3">
-                      <h3 className="text-lg font-semibold text-ink">Pending Labor Costs</h3>
-                      <button className="text-button" onClick={() => setTab("wages")}>View all</button>
+                      <div className="flex items-center gap-2">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-rose-500/10">
+                          <svg className="h-4 w-4 text-rose-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M12 4v16m8-8H4" />
+                          </svg>
+                        </div>
+                        <h3 className="text-lg font-semibold text-ink">Pending Labor</h3>
+                      </div>
+                      <button className="text-button" onClick={() => setTab("wages")}>
+                        View all
+                        <svg className="ml-1 inline-block h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="9 18 15 12 9 6" />
+                        </svg>
+                      </button>
                     </div>
                     <div className="mt-4 flex flex-col gap-2">
-                      {unpaidRecords.slice(0, 6).map((record) => (
+                      {unpaidRecords.slice(0, 5).map((record) => (
                         <div key={record.id} className="ledger-row">
-                          <div>
-                            <p className="font-medium text-ink">{record.worker_name}</p>
-                            <p className="text-sm text-ink-muted">{formatDate(record.week_start)}</p>
+                          <div className="flex items-center gap-3">
+                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-rose-500/10 text-xs font-bold text-rose-400">
+                              {record.worker_name?.charAt(0)?.toUpperCase() || "?"}
+                            </div>
+                            <div>
+                              <p className="font-medium text-ink">{record.worker_name}</p>
+                              <p className="text-xs text-ink-muted">Week of {formatDate(record.week_start)}</p>
+                            </div>
                           </div>
-                          <div className="text-right">
+                          <div className="flex items-center gap-3">
                             <p className="font-semibold text-rose-400">{money(record.amount)}</p>
-                            <button className="text-button" onClick={() => setRecordStatus(record.id, "paid")}>Mark paid</button>
+                            <button className="text-button whitespace-nowrap" onClick={() => setRecordStatus(record.id, "paid")}>Mark paid</button>
                           </div>
                         </div>
                       ))}
                       {unpaidRecords.length === 0 && <EmptyState title="All labor costs settled" detail="Great! No pending payments." />}
                     </div>
+                    {unpaidRecords.length > 5 && (
+                      <p className="mt-3 text-center text-xs text-ink-muted">
+                        +{unpaidRecords.length - 5} more pending {unpaidRecords.length - 5 === 1 ? "record" : "records"} — <button className="text-button inline" onClick={() => setTab("wages")}>view all</button>
+                      </p>
+                    )}
                   </div>
 
                   <div className="panel p-5">
                     <div className="flex items-center justify-between gap-3">
-                      <h3 className="text-lg font-semibold text-ink">Recent Material Spend</h3>
-                      <button className="text-button" onClick={() => setTab("materials")}>View all</button>
+                      <div className="flex items-center gap-2">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber/10">
+                          <svg className="h-4 w-4 text-amber" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 2 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                            <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+                            <line x1="12" y1="22.08" x2="12" y2="12" />
+                          </svg>
+                        </div>
+                        <h3 className="text-lg font-semibold text-ink">Recent Materials</h3>
+                      </div>
+                      <button className="text-button" onClick={() => setTab("materials")}>
+                        View all
+                        <svg className="ml-1 inline-block h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="9 18 15 12 9 6" />
+                        </svg>
+                      </button>
                     </div>
                     <div className="mt-4 flex flex-col gap-2">
-                      {materials.slice(0, 6).map((material) => (
+                      {materials.slice(0, 5).map((material) => (
                         <div key={material.id} className="ledger-row">
-                          <div>
-                            <p className="font-medium text-ink">{material.name}</p>
-                            <p className="text-sm text-ink-muted">
-                              {formatDate(material.date)} {material.category ? `- ${material.category}` : ""}
-                            </p>
+                          <div className="flex items-center gap-3">
+                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber/10">
+                              <svg className="h-4 w-4 text-amber" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 2 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                              </svg>
+                            </div>
+                            <div>
+                              <p className="font-medium text-ink">{material.name}</p>
+                              <p className="text-xs text-ink-muted">
+                                {formatDate(material.date)}{material.category ? ` • ${material.category}` : ""}{material.supplier ? ` • ${material.supplier}` : ""}
+                              </p>
+                            </div>
                           </div>
                           <p className="font-semibold text-ink">{money(material.cost)}</p>
                         </div>
                       ))}
                       {materials.length === 0 && <EmptyState title="No materials recorded" detail="Add material costs as they occur." />}
                     </div>
+                    {materials.length > 5 && (
+                      <p className="mt-3 text-center text-xs text-ink-muted">
+                        +{materials.length - 5} more {materials.length - 5 === 1 ? "entry" : "entries"} — <button className="text-button inline" onClick={() => setTab("materials")}>view all</button>
+                      </p>
+                    )}
                   </div>
                 </div>
               </section>
