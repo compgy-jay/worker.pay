@@ -692,23 +692,27 @@ export default function Home() {
 
       {/* ─── LANDING HERO ─── */}
       <section className="relative flex min-h-screen items-center overflow-hidden">
-        <div className="landing-gradient" />
+        <video
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute inset-0 h-full w-full object-cover"
+          poster="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1920' height='1080'%3E%3Crect fill='%230a0a12' width='1920' height='1080'/%3E%3C/svg%3E"
+        >
+          <source src="https://cdn.pixabay.com/video/2020/06/12/41828-431406550_large.mp4" type="video/mp4" />
+        </video>
+        <div className="absolute inset-0 bg-gradient-to-b from-bg-deep/70 via-bg-deep/50 to-bg-deep/80" />
         <div className="landing-grid" />
-        <div className="landing-glow" style={{ top: "5%", left: "55%" }} />
-        <div className="landing-glow" style={{ bottom: "10%", right: "65%", width: "500px", height: "500px" }} />
 
         <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-col items-center px-6 text-center">
-          <div className="flex items-center gap-2 rounded-full border border-amber/20 bg-amber/5 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-amber">
+          <div className="flex items-center gap-2 rounded-full border border-amber/20 bg-amber/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-amber backdrop-blur-sm">
             <span className="inline-block h-1.5 w-1.5 rounded-full bg-amber shadow-[0_0_6px_rgba(200,168,78,0.6)]" />
-            Integrated Construction Platform
+            Construction Management Platform
           </div>
 
           <h1 className="mt-8 font-serif text-4xl font-bold tracking-tight text-ink md:text-6xl lg:text-7xl">
-            Build Smarter.
-            <br />
-            <span className="bg-gradient-to-r from-amber to-amber-light bg-clip-text text-transparent">
-              Manage Better.
-            </span>
+            Pulse
           </h1>
           <p className="mt-6 max-w-2xl text-base leading-relaxed text-ink-muted md:text-lg">
             Track labor costs, manage materials, monitor budgets, and keep your
@@ -772,10 +776,10 @@ export default function Home() {
           <div className="text-center">
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-amber">Capabilities</p>
             <h2 className="mt-3 font-serif text-3xl font-bold tracking-tight text-ink md:text-4xl">
-              Built for Electrical, Data &amp; Security Contractors
+              Electrical &bull; Data &bull; Security
             </h2>
             <p className="mx-auto mt-4 max-w-xl text-sm text-ink-muted">
-              Purpose-built tools that match how real contractors work — from rough-in to final fit-out.
+              Purpose-built for contractors who handle power, networking, and surveillance.
             </p>
           </div>
 
