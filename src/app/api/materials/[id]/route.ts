@@ -1,7 +1,9 @@
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { runDbRoute } from "@/lib/api-route";
 
 function parseNonNegativeNumber(value: unknown) {
   if (value == null) return null;
@@ -30,8 +32,10 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
   if (name !== undefined && (typeof name !== "string" || !name.trim())) {
     return NextResponse.json({ error: "Material name is required" }, { status: 400 });
   }
-  const result = await db.execute(
-    `UPDATE materials SET
+
+  return runDbRoute(async () => {
+    const result = await db.execute(
+      `UPDATE materials SET
       name = COALESCE(?, name),
       quantity = COALESCE(?, quantity),
       unit = COALESCE(?, unit),
@@ -41,30 +45,33 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       supplier = COALESCE(?, supplier),
       notes = COALESCE(?, notes)
     WHERE id = ?`,
-    [
-      name?.trim(),
-      parsedQuantity,
-      unit,
-      parsedCost,
-      date,
-      category?.trim(),
-      supplier?.trim(),
-      notes,
-      id,
-    ]
-  );
-  if (result.rowsAffected === 0) {
-    return NextResponse.json({ error: "Material not found" }, { status: 404 });
-  }
-  const { rows } = await db.execute("SELECT * FROM materials WHERE id = ?", [id]);
-  return NextResponse.json(rows[0]);
+      [
+        name?.trim(),
+        parsedQuantity,
+        unit,
+        parsedCost,
+        date,
+        category?.trim(),
+        supplier?.trim(),
+        notes,
+        id,
+      ]
+    );
+    if (result.rowsAffected === 0) {
+      return NextResponse.json({ error: "Material not found" }, { status: 404 });
+    }
+    const { rows } = await db.execute("SELECT * FROM materials WHERE id = ?", [id]);
+    return NextResponse.json(rows[0]);
+  });
 }
 
 export async function DELETE(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const result = await db.execute("DELETE FROM materials WHERE id = ?", [id]);
-  if (result.rowsAffected === 0) {
-    return NextResponse.json({ error: "Material not found" }, { status: 404 });
-  }
-  return NextResponse.json({ success: true });
+  return runDbRoute(async () => {
+    const result = await db.execute("DELETE FROM materials WHERE id = ?", [id]);
+    if (result.rowsAffected === 0) {
+      return NextResponse.json({ error: "Material not found" }, { status: 404 });
+    }
+    return NextResponse.json({ success: true });
+  });
 }

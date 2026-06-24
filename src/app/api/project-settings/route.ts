@@ -1,11 +1,15 @@
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { runDbRoute } from "@/lib/api-route";
 
 export async function GET() {
-  const { rows } = await db.execute("SELECT * FROM project_settings WHERE id = 1");
-  return NextResponse.json(rows[0]);
+  return runDbRoute(async () => {
+    const { rows } = await db.execute("SELECT * FROM project_settings WHERE id = 1");
+    return NextResponse.json(rows[0]);
+  });
 }
 
 export async function PUT(request: Request) {
@@ -26,8 +30,9 @@ export async function PUT(request: Request) {
     return NextResponse.json({ error: "Currency must be a 3-letter code" }, { status: 400 });
   }
 
-  await db.execute(
-    `UPDATE project_settings SET
+  return runDbRoute(async () => {
+    await db.execute(
+      `UPDATE project_settings SET
       project_name = COALESCE(?, project_name),
       pm_name = COALESCE(?, pm_name),
       pm_contact = COALESCE(?, pm_contact),
@@ -36,16 +41,17 @@ export async function PUT(request: Request) {
       currency = COALESCE(?, currency),
       budget = COALESCE(?, budget)
     WHERE id = 1`,
-    [
-      project_name?.trim(),
-      pm_name?.trim(),
-      pm_contact?.trim(),
-      foreman_name?.trim(),
-      foreman_contact?.trim(),
-      currency?.trim().toUpperCase(),
-      parsedBudget,
-    ]
-  );
-  const { rows } = await db.execute("SELECT * FROM project_settings WHERE id = 1");
-  return NextResponse.json(rows[0]);
+      [
+        project_name?.trim(),
+        pm_name?.trim(),
+        pm_contact?.trim(),
+        foreman_name?.trim(),
+        foreman_contact?.trim(),
+        currency?.trim().toUpperCase(),
+        parsedBudget,
+      ]
+    );
+    const { rows } = await db.execute("SELECT * FROM project_settings WHERE id = 1");
+    return NextResponse.json(rows[0]);
+  });
 }

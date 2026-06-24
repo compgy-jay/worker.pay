@@ -1,14 +1,63 @@
-import { createClient } from '@libsql/client';
+import { createClient, type Client } from "@libsql/client";
 
-const url = process.env.DATABASE_URL || 'file:local.db';
-const authToken = process.env.DATABASE_AUTH_TOKEN || '';
+export class DatabaseConfigError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "DatabaseConfigError";
+  }
+}
 
-export const db = createClient({
-  url,
-  authToken,
-});
+function resolveDatabaseUrl(): string {
+  const url = process.env.DATABASE_URL?.trim();
 
-async function initDb() {
+  if (url) {
+    if (url.startsWith("file:")) {
+      if (process.env.VERCEL) {
+        throw new DatabaseConfigError(
+          "Local SQLite cannot run on Vercel. Set DATABASE_URL to a Turso libsql:// URL in Vercel project settings."
+        );
+      }
+      return url;
+    }
+    return url;
+  }
+
+  if (process.env.VERCEL) {
+    throw new DatabaseConfigError(
+      "DATABASE_URL is not configured on Vercel. Create a Turso database and add DATABASE_URL plus DATABASE_AUTH_TOKEN. See docs/VERCEL_DEPLOYMENT.md."
+    );
+  }
+
+  return "file:local.db";
+}
+
+function resolveAuthToken(url: string): string {
+  const token = process.env.DATABASE_AUTH_TOKEN?.trim() || "";
+  if (url.startsWith("file:")) {
+    return token;
+  }
+  if (!token) {
+    throw new DatabaseConfigError(
+      "DATABASE_AUTH_TOKEN is required when using a remote libSQL database (Turso)."
+    );
+  }
+  return token;
+}
+
+let client: Client;
+let ready: Promise<void>;
+
+function bootstrap() {
+  const url = resolveDatabaseUrl();
+  const authToken = resolveAuthToken(url);
+  client = createClient({ url, authToken });
+  ready = initDb(client).catch((error) => {
+    console.error("Database initialization failed:", error);
+    throw error;
+  });
+}
+
+async function initDb(db: Client) {
   await db.executeMultiple(`
     CREATE TABLE IF NOT EXISTS workers (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -72,12 +121,41 @@ async function initDb() {
   `);
 }
 
-const ready = initDb()
-  .catch((e) => {
-    console.error("Database initialization failed:", e);
-    throw e;
-  });
+async function ensureReady() {
+  await ready;
+}
+
+try {
+  bootstrap();
+} catch (error) {
+  ready = Promise.reject(error);
+}
+
+export const db = {
+  execute: (...args: Parameters<Client["execute"]>) =>
+    ensureReady().then(() => client.execute(...args)),
+  executeMultiple: (...args: Parameters<Client["executeMultiple"]>) =>
+    ensureReady().then(() => client.executeMultiple(...args)),
+  batch: (...args: Parameters<Client["batch"]>) =>
+    ensureReady().then(() => client.batch(...args)),
+};
 
 export async function waitReady() {
-  await ready;
+  await ensureReady();
+}
+
+export function getDatabaseStatus() {
+  const configuredUrl = process.env.DATABASE_URL?.trim();
+  const isVercel = Boolean(process.env.VERCEL);
+  const mode = configuredUrl?.startsWith("file:") || (!configuredUrl && !isVercel)
+    ? "local"
+    : configuredUrl
+      ? "remote"
+      : "missing";
+
+  return {
+    ok: mode !== "missing" && !(isVercel && mode === "local"),
+    mode,
+    platform: isVercel ? "vercel" : "local",
+  };
 }

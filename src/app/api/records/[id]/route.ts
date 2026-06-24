@@ -1,7 +1,9 @@
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { runDbRoute } from "@/lib/api-route";
 
 const PAY_STATUSES = new Set(["paid", "unpaid"]);
 
@@ -49,22 +51,26 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
   updates.push("updated_at = datetime('now')");
   values.push(id);
 
-  const result = await db.execute(
-    `UPDATE salary_records SET ${updates.join(", ")} WHERE id = ?`,
-    values
-  );
-  if (result.rowsAffected === 0) {
-    return NextResponse.json({ error: "Record not found" }, { status: 404 });
-  }
-  const { rows } = await db.execute("SELECT * FROM salary_records WHERE id = ?", [id]);
-  return NextResponse.json(rows[0]);
+  return runDbRoute(async () => {
+    const result = await db.execute(
+      `UPDATE salary_records SET ${updates.join(", ")} WHERE id = ?`,
+      values
+    );
+    if (result.rowsAffected === 0) {
+      return NextResponse.json({ error: "Record not found" }, { status: 404 });
+    }
+    const { rows } = await db.execute("SELECT * FROM salary_records WHERE id = ?", [id]);
+    return NextResponse.json(rows[0]);
+  });
 }
 
 export async function DELETE(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const result = await db.execute("DELETE FROM salary_records WHERE id = ?", [id]);
-  if (result.rowsAffected === 0) {
-    return NextResponse.json({ error: "Record not found" }, { status: 404 });
-  }
-  return NextResponse.json({ success: true });
+  return runDbRoute(async () => {
+    const result = await db.execute("DELETE FROM salary_records WHERE id = ?", [id]);
+    if (result.rowsAffected === 0) {
+      return NextResponse.json({ error: "Record not found" }, { status: 404 });
+    }
+    return NextResponse.json({ success: true });
+  });
 }

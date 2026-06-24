@@ -1,7 +1,9 @@
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { runDbRoute } from "@/lib/api-route";
 
 function parseNonNegativeNumber(value: unknown, fallback?: number) {
   if (value == null || value === "") return fallback ?? null;
@@ -47,8 +49,11 @@ export async function GET(request: Request) {
   }
 
   const sql = `SELECT * FROM materials${where.length ? ` WHERE ${where.join(" AND ")}` : ""} ORDER BY date DESC, id DESC`;
-  const { rows } = await db.execute(sql, params);
-  return NextResponse.json(rows);
+
+  return runDbRoute(async () => {
+    const { rows } = await db.execute(sql, params);
+    return NextResponse.json(rows);
+  });
 }
 
 export async function POST(request: Request) {
@@ -68,19 +73,22 @@ export async function POST(request: Request) {
   if (!isValidDate(materialDate)) {
     return NextResponse.json({ error: "Date must be a YYYY-MM-DD date" }, { status: 400 });
   }
-  const result = await db.execute(
-    "INSERT INTO materials (name, quantity, unit, cost, date, category, supplier, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-    [
-      name.trim(),
-      parsedQuantity,
-      unit || "pcs",
-      parsedCost,
-      materialDate,
-      category?.trim() || "",
-      supplier?.trim() || "",
-      notes || "",
-    ]
-  );
-  const { rows } = await db.execute("SELECT * FROM materials WHERE id = ?", [Number(result.lastInsertRowid!)]);
-  return NextResponse.json(rows[0], { status: 201 });
+
+  return runDbRoute(async () => {
+    const result = await db.execute(
+      "INSERT INTO materials (name, quantity, unit, cost, date, category, supplier, notes) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+      [
+        name.trim(),
+        parsedQuantity,
+        unit || "pcs",
+        parsedCost,
+        materialDate,
+        category?.trim() || "",
+        supplier?.trim() || "",
+        notes || "",
+      ]
+    );
+    const { rows } = await db.execute("SELECT * FROM materials WHERE id = ?", [Number(result.lastInsertRowid!)]);
+    return NextResponse.json(rows[0], { status: 201 });
+  });
 }

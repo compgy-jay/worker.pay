@@ -1,7 +1,9 @@
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { runDbRoute } from "@/lib/api-route";
 
 const PAY_STATUSES = new Set(["paid", "unpaid"]);
 
@@ -75,8 +77,11 @@ export async function GET(request: Request) {
   }
 
   sql += " ORDER BY sr.week_start DESC, sr.id DESC";
-  const { rows } = await db.execute(sql, params);
-  return NextResponse.json(rows);
+
+  return runDbRoute(async () => {
+    const { rows } = await db.execute(sql, params);
+    return NextResponse.json(rows);
+  });
 }
 
 export async function POST(request: Request) {
@@ -91,10 +96,6 @@ export async function POST(request: Request) {
   if (!isValidDate(week_start)) {
     return NextResponse.json({ error: "week_start must be a YYYY-MM-DD date" }, { status: 400 });
   }
-  const workerResult = await db.execute("SELECT id FROM workers WHERE id = ?", [parsedWorkerId]);
-  if (!workerResult.rows[0]) {
-    return NextResponse.json({ error: "Worker not found" }, { status: 404 });
-  }
   const parsedAmount = parseNonNegativeAmount(amount);
   if (parsedAmount == null) {
     return NextResponse.json({ error: "Amount must be a non-negative number" }, { status: 400 });
@@ -103,10 +104,17 @@ export async function POST(request: Request) {
   if (!PAY_STATUSES.has(payStatus)) {
     return NextResponse.json({ error: "status must be paid or unpaid" }, { status: 400 });
   }
-  const result = await db.execute(
-    "INSERT INTO salary_records (worker_id, week_start, amount, status) VALUES (?, ?, ?, ?)",
-    [parsedWorkerId, week_start, parsedAmount, payStatus]
-  );
-  const { rows } = await db.execute("SELECT * FROM salary_records WHERE id = ?", [Number(result.lastInsertRowid!)]);
-  return NextResponse.json(rows[0], { status: 201 });
+
+  return runDbRoute(async () => {
+    const workerResult = await db.execute("SELECT id FROM workers WHERE id = ?", [parsedWorkerId]);
+    if (!workerResult.rows[0]) {
+      return NextResponse.json({ error: "Worker not found" }, { status: 404 });
+    }
+    const result = await db.execute(
+      "INSERT INTO salary_records (worker_id, week_start, amount, status) VALUES (?, ?, ?, ?)",
+      [parsedWorkerId, week_start, parsedAmount, payStatus]
+    );
+    const { rows } = await db.execute("SELECT * FROM salary_records WHERE id = ?", [Number(result.lastInsertRowid!)]);
+    return NextResponse.json(rows[0], { status: 201 });
+  });
 }

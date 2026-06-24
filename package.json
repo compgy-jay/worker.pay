@@ -5,11 +5,12 @@
   "scripts": {
     "dev": "next dev",
     "dev:turbo": "next dev --turbo",
-    "build": "next build",
+    "build": "node scripts/check-vercel-env.mjs && next build",
     "start": "next start",
     "start:dev": "npm run dev",
     "start:prod": "npm run build && npm run start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "vercel:env": "bash scripts/print-vercel-env.sh"
   },
   "dependencies": {
     "@fontsource/noto-serif-sc": "^5.2.9",

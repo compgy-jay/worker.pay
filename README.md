@@ -31,6 +31,14 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) — **Login: Admin / newday**
 
+### Deploy to Vercel
+
+Vercel requires a hosted Turso database (local `file:` SQLite does not persist on serverless).
+
+1. Create a Turso database and token — see **[Vercel Deployment Guide](./docs/VERCEL_DEPLOYMENT.md)**
+2. Add `DATABASE_URL` and `DATABASE_AUTH_TOKEN` in Vercel project settings
+3. Redeploy, then verify: `https://your-app.vercel.app/api/health`
+
 ### Production build
 
 ```bash
@@ -52,6 +60,7 @@ Comprehensive documentation is available in the `/docs` directory:
 | **[Quick Reference](./docs/QUICK_REFERENCE.md)** | Common tasks, shortcuts, troubleshooting | All users |
 | **[API Reference](./docs/API_REFERENCE.md)** | Complete endpoint documentation, examples | Developers |
 | **[Configuration Guide](./docs/CONFIGURATION.md)** | Deployment, environment, security, scaling | DevOps, Admins |
+| **[Vercel Deployment](./docs/VERCEL_DEPLOYMENT.md)** | Turso setup for Vercel serverless | DevOps |
 | **[Architecture Overview](./docs/ARCHITECTURE.md)** | System design, database schema, tech stack | Developers, Architects |
 | **[Changelog](./CHANGELOG.md)** | Version history, features, updates | Everyone |
 

@@ -1,7 +1,9 @@
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { runDbRoute } from "@/lib/api-route";
 
 export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -9,19 +11,23 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
   if (!name || typeof name !== "string" || !name.trim()) {
     return NextResponse.json({ error: "Name is required" }, { status: 400 });
   }
-  await db.execute(
-    "UPDATE workers SET name = ?, contact = ?, department = ? WHERE id = ?",
-    [name.trim(), contact?.trim() || "", department?.trim() || "", id]
-  );
-  const { rows } = await db.execute("SELECT * FROM workers WHERE id = ?", [id]);
-  return NextResponse.json(rows[0]);
+  return runDbRoute(async () => {
+    await db.execute(
+      "UPDATE workers SET name = ?, contact = ?, department = ? WHERE id = ?",
+      [name.trim(), contact?.trim() || "", department?.trim() || "", id]
+    );
+    const { rows } = await db.execute("SELECT * FROM workers WHERE id = ?", [id]);
+    return NextResponse.json(rows[0]);
+  });
 }
 
 export async function DELETE(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const result = await db.execute("DELETE FROM workers WHERE id = ?", [id]);
-  if (result.rowsAffected === 0) {
-    return NextResponse.json({ error: "Worker not found" }, { status: 404 });
-  }
-  return NextResponse.json({ success: true });
+  return runDbRoute(async () => {
+    const result = await db.execute("DELETE FROM workers WHERE id = ?", [id]);
+    if (result.rowsAffected === 0) {
+      return NextResponse.json({ error: "Worker not found" }, { status: 404 });
+    }
+    return NextResponse.json({ success: true });
+  });
 }
