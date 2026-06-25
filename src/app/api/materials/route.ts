@@ -2,6 +2,16 @@ export const dynamic = 'force-dynamic';
 
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { createClient } from "@/lib/supabase/server";
+
+async function requireAuth() {
+  const supabase = await createClient();
+  const { data: { user }, error } = await supabase.auth.getUser();
+  if (error || !user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  return null;
+}
 
 function parseNonNegativeNumber(value: unknown, fallback?: number) {
   if (value == null || value === "") return fallback ?? null;
@@ -14,6 +24,8 @@ function isValidDate(value: unknown) {
 }
 
 export async function GET(request: Request) {
+  const unauth = await requireAuth();
+  if (unauth) return unauth;
   const { searchParams } = new URL(request.url);
   const from = searchParams.get("from");
   const to = searchParams.get("to");
@@ -52,6 +64,8 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  const unauth = await requireAuth();
+  if (unauth) return unauth;
   const { name, quantity, unit, cost, date, category, supplier, notes } = await request.json();
   if (!name || typeof name !== "string" || !name.trim()) {
     return NextResponse.json({ error: "Material name is required" }, { status: 400 });

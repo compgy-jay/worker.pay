@@ -2,8 +2,18 @@ export const dynamic = 'force-dynamic';
 
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { createClient } from "@/lib/supabase/server";
 
 const PAY_STATUSES = new Set(["paid", "unpaid"]);
+
+async function requireAuth() {
+  const supabase = await createClient();
+  const { data: { user }, error } = await supabase.auth.getUser();
+  if (error || !user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  return null;
+}
 
 function parsePositiveId(value: unknown) {
   const parsed = typeof value === "number" ? value : parseInt(String(value), 10);
@@ -20,6 +30,8 @@ function isValidDate(value: unknown) {
 }
 
 export async function GET(request: Request) {
+  const unauth = await requireAuth();
+  if (unauth) return unauth;
   const { searchParams } = new URL(request.url);
   const workerId = searchParams.get("worker_id");
   const status = searchParams.get("status");
@@ -80,6 +92,8 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  const unauth = await requireAuth();
+  if (unauth) return unauth;
   const { worker_id, week_start, amount, status } = await request.json();
   if (!worker_id || !week_start || amount == null) {
     return NextResponse.json({ error: "worker_id, week_start, and amount are required" }, { status: 400 });

@@ -2,6 +2,16 @@ export const dynamic = 'force-dynamic';
 
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { createClient } from "@/lib/supabase/server";
+
+async function requireAuth() {
+  const supabase = await createClient();
+  const { data: { user }, error } = await supabase.auth.getUser();
+  if (error || !user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  return null;
+}
 
 function parseNonNegativeNumber(value: unknown) {
   if (value == null) return null;
@@ -14,6 +24,8 @@ function isValidDate(value: unknown) {
 }
 
 export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const unauth = await requireAuth();
+  if (unauth) return unauth;
   const { id } = await params;
   const { name, quantity, unit, cost, date, category, supplier, notes } = await request.json();
   const parsedQuantity = quantity !== undefined ? parseNonNegativeNumber(quantity) : null;
@@ -61,6 +73,8 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
 }
 
 export async function DELETE(_request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const unauth = await requireAuth();
+  if (unauth) return unauth;
   const { id } = await params;
   const result = await db.execute("DELETE FROM materials WHERE id = ?", [id]);
   if (result.rowsAffected === 0) {
