@@ -1,248 +1,74 @@
-# ProjectHub Quick Reference Guide
+# Pulse — Quick Reference
 
-Fast lookup guide for common tasks and keyboard shortcuts.
+## Common Tasks
 
-## 🎯 Common Tasks
+| Task | How |
+|------|-----|
+| Add team member | Workers tab → fill form → **Add Member** |
+| Record labor cost | Wages tab → select worker, week, amount → **Add Cost** |
+| Mark as paid | Wages tab → **Mark paid** on a record |
+| Add material | Materials tab → fill form → **Add Item** |
+| Export CSV | Wages/Materials tab → **Export CSV** |
+| Print report | Settings tab → **Print Report** |
+| Send notification | Settings tab → Notification Sender → pick channel |
+| Update project config | Settings tab → edit fields → **Save Settings** |
 
-### Adding Team Members
-1. **Team Members** tab → Enter name, phone, department → **Add Member**
+## Dashboard Metrics
 
-### Recording Labor Costs
-1. **Labor Costs** tab → Select worker → Enter week & amount → **Add Cost**
+| Metric | Meaning |
+|--------|---------|
+| Total Spend | Labor + Material costs |
+| Outstanding Labor | Unpaid wages |
+| Material Cost | Total material spend |
+| Team Size | Active workers |
+| Budget Used % | (Total Spend / Budget) × 100 |
 
-### Tracking Materials
-1. **Materials** tab → Fill all fields → **Add Item**
+## Notifications
 
-### Updating Payment Status
-1. **Labor Costs** tab → Click **Mark paid**/**Mark unpaid**
+| Channel | Provider | Config |
+|---------|----------|--------|
+| Email | Resend | `RESEND_API_KEY` + `FROM_EMAIL` |
+| SMS | Twilio | `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_PHONE_NUMBER` |
+| WhatsApp | Twilio | Same SID/Token + `TWILIO_WHATSAPP_NUMBER` |
 
-### Exporting Data
-- **Labor Costs** tab → **Export CSV**
-- **Materials** tab → **Export CSV**
-- **Settings** tab → **Print Report**
+## Env Vars Quick Reference
 
-### Changing Project Settings
-1. **Settings** tab → Update fields → **Save Settings**
-
----
-
-## 📊 Dashboard Metrics Explained
-
-| Metric | Meaning | Action |
-|--------|---------|--------|
-| **Total Spend** | Labor + Materials | Review budget overage |
-| **Outstanding Labor** | Unpaid wage costs | Mark paid when disbursed |
-| **Material Cost** | Total material purchases | Track procurement spend |
-| **Team Size** | Active team members | Verify roster completeness |
-| **Budget Used %** | Percentage of budget spent | Plan remaining work |
-
----
-
-## 🔍 Filtering Tips
-
-### Quick Filter Ideas
-
-**Labor Costs:**
-- Find unpaid costs: Status filter → "Pending"
-- Check one person's history: Worker filter
-- Monthly review: Date range filter
-- Find recent: Sort by date descending
-
-**Materials:**
-- By category: Use category dropdown
-- By vendor: Search supplier name
-- By period: Date range filter
-- Find item: Search by name or notes
-
-### Filter Reset
-All tabs have **Reset** button to clear all filters
-
----
-
-## 💾 Data Management
-
-### Backup Your Database
-```bash
-# One-time backup
-cp data.db data.db.backup.$(date +%Y%m%d)
-
-# Automated daily (add to crontab)
-0 2 * * * cp /path/to/data.db /backups/data.db.$(date +\%Y\%m\%d)
+```
+NEXT_PUBLIC_SUPABASE_URL=       # Required
+NEXT_PUBLIC_SUPABASE_ANON_KEY=  # Required
+SUPABASE_SERVICE_ROLE_KEY=      # Required
+RESEND_API_KEY=                 # Optional (email)
+TWILIO_ACCOUNT_SID=             # Optional (SMS/WhatsApp)
+TWILIO_AUTH_TOKEN=              # Optional
+TWILIO_PHONE_NUMBER=            # Optional (SMS)
+TWILIO_WHATSAPP_NUMBER=         # Optional (WhatsApp)
+FROM_EMAIL=                     # Optional (email sender)
 ```
 
-### Restore from Backup
-```bash
-# Stop the app first
-cp data.db.backup.20260620 data.db
-# Restart app
+## Project Structure
+
+```
+src/
+├── app/          # Pages + API routes
+├── components/   # AppShell, DashboardHero
+├── hooks/        # Entrance animation, count-up
+├── lib/          # DB, types, notifications, supabase
+└── utils/        # Twilio client
 ```
 
----
-
-## ⌨️ Keyboard Shortcuts
+## Keyboard Shortcuts
 
 | Action | Shortcut |
 |--------|----------|
-| Print Report | `Ctrl+P` / `Cmd+P` |
-| Focus Search | `Ctrl+F` / `Cmd+F` |
-| Next Tab | `Ctrl+→` |
-| Previous Tab | `Ctrl+←` |
+| Print report | `Ctrl+P` / `Cmd+P` |
+| Focus search | `Ctrl+F` / `Cmd+F` |
 
----
+## Troubleshooting
 
-## 🚨 Common Issues & Quick Fixes
-
-| Issue | Solution |
-|-------|----------|
-| Can't find team member | Clear filters, check spelling |
-| Data not saving | Check browser console (F12) |
-| Export file empty | Reset filters, verify data exists |
-| Page slow | Clear browser cache |
-| App won't start | Check port 3000 availability |
-
----
-
-## 📋 Weekly Checklist
-
-- [ ] Review pending labor costs
-- [ ] Update payment status for paid workers
-- [ ] Record new material purchases
-- [ ] Check budget vs. actual spend
-- [ ] Backup database
-- [ ] Review for data entry errors
-
----
-
-## 💵 Budget Monitoring
-
-### Budget Formula
-```
-Budget Remaining = Total Budget - (Labor Costs + Material Costs)
-Budget Used % = (Total Spend / Total Budget) × 100
-```
-
-### Typical Budgets
-- Small project (1-5 people): $10k-$50k
-- Medium project (5-20 people): $50k-$250k
-- Large project (20+ people): $250k+
-
----
-
-## 📱 Export Format
-
-### Labor Costs CSV Columns
-```
-Week Start | Worker | Department | Phone | Amount | Status
-2026-06-16 | John Doe | Mason | 555-1234 | 500.00 | unpaid
-```
-
-### Materials CSV Columns
-```
-Date | Item | Category | Supplier | Quantity | Unit | Cost | Notes
-2026-06-20 | Concrete | Cement | BuildCo | 50 | bags | 1500 | Premium
-```
-
----
-
-## 🔧 Settings Reference
-
-| Setting | Purpose | Example |
-|---------|---------|---------|
-| Project Name | Display name | "Oak Street Building" |
-| Currency | Cost formatting | "USD" or "KES" |
-| Budget | Total allocation | "50000" |
-| PM Name | Project manager | "Alice Johnson" |
-| PM Contact | Manager phone | "555-0001" |
-| Foreman | Site lead | "Bob Smith" |
-| Foreman Contact | Lead phone | "555-0002" |
-
----
-
-## 📊 Report Contents
-
-**Printed Report Includes:**
-- Project name and team info
-- Full labor costs ledger
-- Complete material inventory
-- Budget summary and status
-- Key metrics and totals
-- Print date and time
-
----
-
-## 🎯 Best Practices
-
-✅ **DO:**
-- Record costs daily
-- Update payment status immediately
-- Use consistent categories
-- Backup weekly
-- Review monthly
-- Export for records
-
-❌ **DON'T:**
-- Delete old records without backing up
-- Leave filters on permanently
-- Forget to save settings
-- Skip backup routines
-- Mix projects in same database
-
----
-
-## 📞 Support Resources
-
-| Resource | Location |
-|----------|----------|
-| Getting Started | `docs/GETTING_STARTED.md` |
-| API Docs | `docs/API_REFERENCE.md` |
-| Setup Guide | `docs/CONFIGURATION.md` |
-| Architecture | `docs/ARCHITECTURE.md` |
-| Main Readme | `README.md` |
-
----
-
-## 🌐 Environment Variables
-
-```bash
-# Development
-NODE_ENV=development
-PROJECT_HUB_DB_PATH=./data.db
-PORT=3000
-
-# Production
-NODE_ENV=production
-PROJECT_HUB_DB_PATH=/var/data/project-hub/database.db
-PORT=3000
-```
-
----
-
-## 📈 Growth Timeline
-
-| Stage | Team Size | Records | Recommendations |
-|-------|-----------|---------|-----------------|
-| Start | 1-5 | <100 | Current setup fine |
-| Growing | 5-20 | 100-1k | Add backups |
-| Large | 20-50 | 1k-10k | Consider archiving |
-| Scaling | 50+ | 10k+ | Plan upgrade path |
-
----
-
-## 🎓 Learning Path
-
-### New Users
-1. Read **Getting Started** guide (10 min)
-2. Add test team members (5 min)
-3. Record sample labor costs (5 min)
-4. Export a report (5 min)
-
-### Advanced Users
-1. Review **API Reference** for integration
-2. Read **Architecture** for customization
-3. Review **Configuration** for deployment
-4. Set up backup automation
-
----
-
-**Last Updated**: 2026-06-20  
-**Version**: 1.0.0
+| Issue | Fix |
+|-------|-----|
+| Can't log in | Check Supabase credentials in `.env.local` |
+| Data not loading | Check browser console (F12) for errors |
+| Notification fails | Verify API keys in env vars |
+| Port in use | `npm run dev -- -p 3001` |
+| DB corrupted | Delete `local.db`, restart (schema auto-creates) |

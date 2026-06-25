@@ -1,231 +1,145 @@
-# ProjectHub
+# Pulse — Project Management & Cost Tracking
 
-**Professional Project Management & Cost Tracking Platform**
+A professional project management platform for tracking teams, labor costs, materials, budgets, and notifications — built with Next.js 16, Supabase Auth, and Turso (SQLite).
 
-ProjectHub is a comprehensive project management system designed for project managers and team leads managing construction projects, facility work, or any labor-intensive initiatives. It enables centralized tracking of team members, labor costs, material procurement, payment status, project budgets, and financial reporting—all in one intuitive dashboard.
+## Features
 
-## ✨ Key Features
+- **Team Management** — Worker roster with departments and contact details
+- **Labor Cost Tracking** — Weekly wage records with paid/unpaid status
+- **Material Management** — Procurement tracking with categories, suppliers, and costing
+- **Budget Monitoring** — Real-time budget vs. spend with utilization metrics
+- **CSV Export** — Export labor and material records for accounting
+- **Print Reports** — Formatted printable project reports
+- **Notifications** — Email via Resend, SMS via Twilio, WhatsApp via Twilio
+- **Supabase Auth** — Secure email/password authentication with session management
+- **Advanced Filtering** — Filter by date range, worker, status, category, and full-text search
 
-- **Team Management**: Maintain a comprehensive team roster with departments, contact information, and organizational structure
-- **Labor Cost Tracking**: Record and track weekly labor costs with payment status (paid/pending), history, and worker details
-- **Material & Supply Management**: Manage material procurement with supplier tracking, categorization, quantities, units, and detailed costing
-- **Budget Monitoring**: Real-time budget overview with spent vs. allocated tracking, budget utilization percentage, and financial health indicators
-- **Advanced Filtering & Search**: Filter data by date range, team member, payment status, category, and full-text search across records
-- **Financial Reports**: Export comprehensive CSV reports for labor costs and materials for auditing, accounting, and stakeholder reporting
-- **Project Dashboard**: Centralized dashboard with key performance metrics, pending payments, recent expenses, and project health indicators
-- **Data Persistence**: Secure SQLite database with support for custom data storage paths and regular backups
-- **Print Reports**: Generate and print project reports for documentation and distribution
+## Quick Start
 
-## 🚀 Quick Start
-
-```bash
-# One-command start (development mode, hot reload)
-./start.sh
-```
-
-Or manually:
 ```bash
 npm install
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) — **Login: Admin / newday**
+Open [http://localhost:3000](http://localhost:3000) — sign up or log in.
 
-### Production build
-
-```bash
-./start.sh --prod
-```
-or `npm run start:prod`
-
-## 📋 Requirements
-
-- **Node.js** 18+ · **npm** 9+ · **OS**: Windows, macOS, or Linux
-
-## 📚 Documentation
-
-Comprehensive documentation is available in the `/docs` directory:
-
-| Document | Purpose | Audience |
-|----------|---------|----------|
-| **[Getting Started Guide](./docs/GETTING_STARTED.md)** | Setup, initial configuration, first steps | New users |
-| **[Quick Reference](./docs/QUICK_REFERENCE.md)** | Common tasks, shortcuts, troubleshooting | All users |
-| **[API Reference](./docs/API_REFERENCE.md)** | Complete endpoint documentation, examples | Developers |
-| **[Configuration Guide](./docs/CONFIGURATION.md)** | Deployment, environment, security, scaling | DevOps, Admins |
-| **[Architecture Overview](./docs/ARCHITECTURE.md)** | System design, database schema, tech stack | Developers, Architects |
-| **[Changelog](./CHANGELOG.md)** | Version history, features, updates | Everyone |
-
-## 🗄️ Data Management
-
-### Database
-
-ProjectHub uses SQLite for reliable local data storage:
-
-- **Default Location**: `data.db` in project root
-- **Automatic Files**: `.db-shm` and `.db-wal` (shared memory and write-ahead log)
-- **Version Control**: Database files are excluded from git
-
-### Custom Database Path
-
-For production deployments or network storage:
+### Production
 
 ```bash
-# Set environment variable before starting app
-export PROJECT_HUB_DB_PATH=/var/data/project-hub/database.db
-npm run start
+npm run build
+npm start
 ```
 
-### Backup Strategy
+## Environment Variables
 
-**Critical**: Implement regular database backups, especially in production:
+Copy `.env.example` to `.env.local` and fill in your credentials:
 
-```bash
-# Simple daily backup
-cp data.db data.db.backup.$(date +%Y%m%d)
-```
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `DATABASE_URL` | dev only | Local SQLite path (default: `file:local.db`) |
+| `NEXT_PUBLIC_SUPABASE_URL` | Yes | Supabase project URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Yes | Supabase anonymous key |
+| `SUPABASE_SERVICE_ROLE_KEY` | Yes | Supabase service role key (admin operations) |
+| `RESEND_API_KEY` | No | Resend API key (email notifications) |
+| `TWILIO_ACCOUNT_SID` | No | Twilio Account SID (SMS/WhatsApp) |
+| `TWILIO_AUTH_TOKEN` | No | Twilio Auth Token |
+| `TWILIO_PHONE_NUMBER` | No* | Twilio number for SMS |
+| `TWILIO_WHATSAPP_NUMBER` | No* | Twilio number for WhatsApp |
+| `FROM_EMAIL` | No | Sender email for notifications |
 
-Include all three database files in backups:
-- `data.db` (main database)
-- `data.db-shm` (shared memory file)
-- `data.db-wal` (write-ahead log)
+\* Required only if using the corresponding notification channel.
 
-## 🎯 Use Cases
-
-- **Construction Projects**: Track workers, daily labor costs, and material procurement
-- **Facility Management**: Monitor maintenance team costs and supply budgets
-- **Project Work**: Control labor expenses and resource allocation
-- **Event Management**: Manage crew scheduling and vendor costs
-- **Renovation Projects**: Track contractor payments and material expenses
-
-## 🛠️ Technology Stack
-
-- **Framework**: Next.js 16 (React 19)
-- **Database**: SQLite with better-sqlite3
-- **Styling**: Tailwind CSS 4
-- **Language**: TypeScript
-- **Runtime**: Node.js
-
-## ❓ Frequently Asked Questions
-
-**Q: Can I run ProjectHub on Windows?**  
-A: Yes! It runs on Windows, macOS, and Linux with Node.js 18+.
-
-**Q: Is there a mobile app?**  
-A: Not yet, but the app is responsive and works well on tablets and mobile browsers.
-
-**Q: Can multiple people use ProjectHub at once?**  
-A: Yes, but SQLite has limited concurrent write support. For heavy concurrent use, consider migrating to PostgreSQL.
-
-**Q: How do I backup my data?**  
-A: Run `cp data.db data.db.backup.$(date +%Y%m%d)` or set up automated backups. See docs/CONFIGURATION.md.
-
-**Q: Can I export my data?**  
-A: Yes! Use the CSV export buttons in Labor Costs and Materials tabs, or print reports from Settings.
-
-**Q: Do you have authentication?**  
-A: Not in v1.0. Add authentication middleware before production use on shared networks.
-
-**Q: How do I upgrade to a newer version?**  
-A: Check CHANGELOG.md for breaking changes, then run `npm install` to update dependencies.
-
-**Q: What if I need more features?**  
-A: See docs/ARCHITECTURE.md for customization guide, or refer to docs/API_REFERENCE.md for integration options.
-
-## 🔧 Troubleshooting
-
-### App won't start
-
-**Port already in use:**
-```bash
-# Change port for development
-npm run dev -- -p 3001
-```
-
-**Dependencies issue:**
-```bash
-# Clear cache and reinstall
-rm -rf node_modules package-lock.json
-npm install
-```
-
-### Database corruption
-
-If the database becomes corrupted, restore from backup:
-
-```bash
-# Restore from backup
-cp data.db.backup.20240101 data.db
-```
-
-### Performance issues
-
-For large datasets (10,000+ records):
-- Consider archiving old projects
-- Export data to external storage
-- Upgrade to higher spec server
-
-## 📝 Project Structure
+## Project Structure
 
 ```
-project-hub/
-├── src/
-│   ├── app/
-│   │   ├── api/              # RESTful API endpoints
-│   │   ├── globals.css       # Global styles
-│   │   ├── layout.tsx        # Root layout
-│   │   └── page.tsx          # Main dashboard
-│   └── lib/
-│       ├── db.ts            # Database connection
-│       ├── format.ts        # Utility functions
-│       └── types.ts         # TypeScript types
-├── public/                   # Static assets
-├── docs/                     # Complete documentation
-│   ├── GETTING_STARTED.md    # Getting started guide
-│   ├── QUICK_REFERENCE.md    # Quick lookup guide
-│   ├── API_REFERENCE.md      # API documentation
-│   ├── CONFIGURATION.md      # Deployment guide
-│   └── ARCHITECTURE.md       # System design
-├── CHANGELOG.md              # Version history and releases
-├── package.json              # Dependencies
-└── tsconfig.json            # TypeScript config
+src/
+├── app/
+│   ├── (app)/             # Authenticated app pages
+│   │   ├── dashboard/     # Project overview with metrics
+│   │   ├── workers/       # Team member management
+│   │   ├── wages/         # Labor cost tracking
+│   │   ├── materials/     # Material management
+│   │   └── settings/      # Project configuration
+│   ├── (auth)/            # Auth pages (login, signup, reset)
+│   ├── (marketing)/       # Landing page
+│   └── api/               # REST API routes
+│       ├── workers/       # Worker CRUD
+│       ├── records/       # Labor cost CRUD
+│       ├── materials/     # Material CRUD
+│       ├── project-settings/
+│       ├── summary/       # Aggregated metrics
+│       ├── notifications/ # Send (email/sms/whatsapp), Log
+│       ├── send-sms/      # Direct Twilio SMS
+│       └── auth/          # Auth callback & welcome
+├── components/            # React components
+│   ├── AppShell.tsx       # Main app UI (tabs, forms, tables)
+│   └── DashboardHero.tsx  # Hero section with project info
+├── hooks/                 # Custom React hooks
+├── lib/
+│   ├── db.ts              # Database connection & init
+│   ├── format.ts          # Formatting helpers (dates, money, CSV)
+│   ├── types.ts           # TypeScript type definitions
+│   ├── supabase/          # Supabase auth utilities
+│   └── notifications/     # Notification channel implementations
+│       ├── index.ts       # sendNotification dispatcher
+│       ├── sms.ts         # Twilio SMS
+│       ├── whatsapp.ts    # Twilio WhatsApp
+│       └── email.ts       # Resend email
+├── utils/
+│   └── twilio.ts          # Safe Twilio client initialization
+└── proxy.ts               # Supabase auth middleware
 ```
 
-## 📖 Main Application Sections
+## API Endpoints
 
-1. **Dashboard**: Overview of project health, metrics, and pending items
-2. **Team Members**: Add, edit, and manage project team roster
-3. **Labor Costs**: Record and track weekly labor expenses and payments
-4. **Materials**: Manage material procurement and supply tracking
-5. **Settings**: Configure project details, budget, and team contacts
+All endpoints require authentication (session cookie).
 
-## 💡 Best Practices
+| Method | Path | Description |
+|--------|------|-------------|
+| GET/POST | `/api/workers` | List / create workers |
+| PUT/DELETE | `/api/workers/[id]` | Update / delete worker |
+| GET/POST | `/api/records` | List (with filters) / create labor records |
+| PUT/DELETE | `/api/records/[id]` | Update / delete record |
+| GET/POST | `/api/materials` | List (with filters) / create materials |
+| PUT/DELETE | `/api/materials/[id]` | Update / delete material |
+| GET/PUT | `/api/project-settings` | Read / update project config |
+| GET | `/api/summary` | Aggregated budget & metrics |
+| POST | `/api/notifications/send` | Send notification via channel |
+| POST | `/api/send-sms` | Direct Twilio SMS |
 
-- **Weekly Reviews**: Review pending payments every Friday
-- **Regular Backups**: Backup database daily in production
-- **Budget Planning**: Set realistic budgets before project start
-- **Data Organization**: Use consistent categories for materials
-- **Export Regularly**: Export reports monthly for record-keeping
+## Tech Stack
 
-## 🤝 Contributing
+| Layer | Technology |
+|-------|-----------|
+| Framework | Next.js 16 (App Router) |
+| UI | React 19, Tailwind CSS 4 |
+| Auth | Supabase (SSR sessions) |
+| Database | Turso (libSQL/SQLite) |
+| Fonts | Outfit, Noto Serif SC (next/font) |
+| Email | Resend |
+| SMS | Twilio |
+| WhatsApp | Twilio |
+| Language | TypeScript 5 |
+| Package Manager | npm |
 
-This is an open project. For improvements or bug reports, please document issues clearly with:
-- Steps to reproduce
-- Expected vs actual behavior
-- Environment details (OS, Node version, browser)
+## Deployment
 
-## 📄 License
+The project is configured for **Vercel** deployment:
 
-ISC License - See LICENSE file for details
+1. Push to GitHub
+2. Import repo in Vercel dashboard
+3. Add all environment variables from `.env.example`
+4. Deploy — `vercel --prod`
 
-## 📮 Support & Contact
+## Documentation
 
-For questions or assistance:
-- Review documentation in `/docs` directory
-- Check troubleshooting section above
-- Review API reference for integration questions
+- **[Getting Started](./docs/GETTING_STARTED.md)** — Setup guide
+- **[API Reference](./docs/API_REFERENCE.md)** — Full endpoint docs
+- **[Configuration](./docs/CONFIGURATION.md)** — Env vars, deployment
+- **[Architecture](./docs/ARCHITECTURE.md)** — System design, schema
+- **[Quick Reference](./docs/QUICK_REFERENCE.md)** — Common tasks
+- **[Changelog](./CHANGELOG.md)** — Version history
 
----
+## License
 
-**Version**: 1.0.0  
-**Last Updated**: 2026-06-20  
-**Status**: Production Ready
+ISC
