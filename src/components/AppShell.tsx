@@ -219,10 +219,14 @@ export default function AppShell({ initialTab }: { initialTab?: Tab }) {
 
   useEffect(() => {
     if (!contentRef.current || booting) return;
-    const ctx = gsap.context(() => {
-      gsap.fromTo(contentRef.current, { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.3, ease: "power2.out" });
-    }, contentRef);
-    return () => ctx.revert();
+    const el = contentRef.current;
+    el.style.opacity = "0";
+    el.style.transform = "translateY(12px)";
+    el.style.transition = "opacity 0.3s ease, transform 0.3s ease";
+    requestAnimationFrame(() => {
+      el.style.opacity = "1";
+      el.style.transform = "translateY(0)";
+    });
   }, [tab, booting]);
 
   const currency = settings?.currency || "KES";
