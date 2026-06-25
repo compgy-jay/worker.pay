@@ -75,7 +75,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   const handleSignOut = useCallback(async () => {
     const { createClient } = await import("@/lib/supabase/client");
-    const supabase = createClient();
+    const supabase = await createClient();
     await supabase.auth.signOut();
     router.push("/login");
   }, [router]);

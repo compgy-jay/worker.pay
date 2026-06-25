@@ -20,7 +20,7 @@ function LoginForm() {
       setBusy(true);
 
       const { createClient } = await import("@/lib/supabase/client");
-      const supabase = createClient();
+      const supabase = await createClient();
 
       const { error: authError } = await supabase.auth.signInWithPassword({
         email,
