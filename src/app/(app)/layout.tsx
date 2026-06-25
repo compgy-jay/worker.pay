@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
 
 type NavTab = { key: string; label: string; href: string };
 
@@ -75,6 +74,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   }, [updateIndicator]);
 
   const handleSignOut = useCallback(async () => {
+    const { createClient } = await import("@/lib/supabase/client");
     const supabase = createClient();
     await supabase.auth.signOut();
     router.push("/login");

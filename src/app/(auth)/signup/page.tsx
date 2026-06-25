@@ -2,11 +2,8 @@
 
 import { useState, useCallback } from "react";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/client";
 
 export default function SignupPage() {
-  const supabase = createClient();
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -18,6 +15,9 @@ export default function SignupPage() {
       e.preventDefault();
       setError("");
       setBusy(true);
+
+      const { createClient } = await import("@/lib/supabase/client");
+      const supabase = createClient();
 
       const { error: authError } = await supabase.auth.signUp({
         email,
@@ -34,7 +34,7 @@ export default function SignupPage() {
       setSent(true);
       setBusy(false);
     },
-    [email, password, supabase]
+    [email, password]
   );
 
   if (sent) {

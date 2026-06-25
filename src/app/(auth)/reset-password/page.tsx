@@ -2,10 +2,8 @@
 
 import { useState, useCallback, Suspense } from "react";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/client";
 
 function ResetForm() {
-  const supabase = createClient();
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -16,6 +14,9 @@ function ResetForm() {
       e.preventDefault();
       setError("");
       setBusy(true);
+
+      const { createClient } = await import("@/lib/supabase/client");
+      const supabase = createClient();
 
       const { error: authError } = await supabase.auth.resetPasswordForEmail(
         email,
@@ -31,7 +32,7 @@ function ResetForm() {
       setSent(true);
       setBusy(false);
     },
-    [email, supabase]
+    [email]
   );
 
   if (sent) {
