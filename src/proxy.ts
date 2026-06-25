@@ -16,12 +16,6 @@ export async function proxy(request: NextRequest) {
     return Response.redirect(url);
   }
 
-  if (user && (path === "/login" || path === "/signup")) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/dashboard";
-    return Response.redirect(url);
-  }
-
   return supabaseResponse;
 }
 
