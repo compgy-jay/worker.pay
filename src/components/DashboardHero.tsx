@@ -1,8 +1,5 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import gsap from "gsap";
-
 export default function DashboardHero({
   projectName,
   pmName,
@@ -14,32 +11,12 @@ export default function DashboardHero({
   onRecordLabor: () => void;
   onPrint: () => void;
 }) {
-  const sectionRef = useRef<HTMLElement>(null);
-  const glowRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!glowRef.current) return;
-    const ctx = gsap.context(() => {
-      gsap.to(glowRef.current, {
-        x: 30,
-        y: -20,
-        duration: 8,
-        ease: "sine.inOut",
-        repeat: -1,
-        yoyo: true,
-      });
-    }, glowRef);
-    return () => ctx.revert();
-  }, []);
 
   return (
-    <section
-      ref={sectionRef}
-      className="relative flex min-h-[320px] items-center overflow-hidden border-b border-border-subtle"
-    >
+    <section className="relative flex min-h-[320px] items-center overflow-hidden border-b border-border-subtle">
       <div className="hero-gradient" />
       <div className="hero-grid" />
-      <div ref={glowRef} className="hero-glow" style={{ top: "10%", left: "60%" }} />
+      <div className="hero-glow animate-glow" style={{ top: "10%", left: "60%" }} />
       <div className="hero-glow" style={{ bottom: "20%", right: "70%", width: "400px", height: "400px" }} />
 
       <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-col gap-6 px-6 py-16 md:py-20">

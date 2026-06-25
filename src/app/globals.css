@@ -1,8 +1,4 @@
 @import "tailwindcss";
-@import "@fontsource/outfit/400.css";
-@import "@fontsource/outfit/600.css";
-@import "@fontsource/noto-serif-sc/400.css";
-@import "@fontsource/noto-serif-sc/700.css";
 
 :root {
   --bg-deep: #050a18;
@@ -32,8 +28,8 @@
   --color-white: #ffffff;
   --color-border-subtle: var(--border-subtle);
   --color-border-active: var(--border-active);
-  --font-sans: "Outfit", ui-sans-serif, system-ui, sans-serif;
-  --font-serif: "Noto Serif SC", ui-serif, Georgia, serif;
+  --font-sans: var(--font-outfit), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-serif), ui-serif, Georgia, serif;
 }
 
 * { box-sizing: border-box; }
@@ -43,7 +39,7 @@ html { scroll-behavior: smooth; }
 body {
   background: var(--bg-deep);
   color: var(--ink);
-  font-family: "Outfit", ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-sans);
   overflow-x: hidden;
 }
 
@@ -627,6 +623,15 @@ select.control option {
   color: #ffffff;
   background: var(--orange);
   font-weight: 600;
+}
+
+@keyframes glow-drift {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(30px, -20px); }
+}
+
+.animate-glow {
+  animation: glow-drift 8s ease-in-out infinite;
 }
 
 @media print {

@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import gsap from "gsap";
 import { useEntranceAnimation, useCountUp } from "@/hooks/useEntranceAnimation";
 import { downloadCsv, formatDate, formatMoney, mondayISO, toQueryString, todayISO } from "@/lib/format";
 import DashboardHero from "@/components/DashboardHero";
@@ -281,6 +280,8 @@ export default function AppShell({ initialTab }: { initialTab?: Tab }) {
       .catch(() => notify("error", "Failed to refresh materials"));
   }, [materialQuery, notify]);
 
+  const booted = useRef(false);
+
   useEffect(() => {
     let isCurrent = true;
 
@@ -299,10 +300,12 @@ export default function AppShell({ initialTab }: { initialTab?: Tab }) {
         setSalaryRecords(recordsData);
         setMaterials(materialsData);
         setSummary(summaryData);
+        booted.current = true;
         setBooting(false);
       })
       .catch(() => {
         if (!isCurrent) return;
+        booted.current = true;
         setBooting(false);
         notify("error", "Failed to load project data");
       });
@@ -313,6 +316,7 @@ export default function AppShell({ initialTab }: { initialTab?: Tab }) {
   }, [notify]);
 
   useEffect(() => {
+    if (!booted.current) return;
     let isCurrent = true;
 
     apiFetch<SalaryRecord[]>(`/api/records${salaryQuery}`)
@@ -329,6 +333,7 @@ export default function AppShell({ initialTab }: { initialTab?: Tab }) {
   }, [notify, salaryQuery]);
 
   useEffect(() => {
+    if (!booted.current) return;
     let isCurrent = true;
 
     apiFetch<Material[]>(`/api/materials${materialQuery}`)

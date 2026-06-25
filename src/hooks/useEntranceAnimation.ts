@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import gsap from "gsap";
 
 export function useEntranceAnimation(deps: unknown[] = []) {
   const ref = useRef<HTMLDivElement>(null);
@@ -10,22 +9,30 @@ export function useEntranceAnimation(deps: unknown[] = []) {
     const el = ref.current;
     if (!el) return;
 
-    const targets = el.querySelectorAll("[data-animate]");
+    const targets = el.querySelectorAll<HTMLElement>("[data-animate]");
     if (!targets.length) return;
 
-    gsap.set(targets, { opacity: 0, y: 24 });
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            (entry.target as HTMLElement).style.opacity = "1";
+            (entry.target as HTMLElement).style.transform = "translateY(0)";
+            observer.unobserve(entry.target);
+          }
+        }
+      },
+      { threshold: 0.1 }
+    );
 
-    const ctx = gsap.context(() => {
-      gsap.to(targets, {
-        opacity: 1,
-        y: 0,
-        duration: 0.6,
-        stagger: 0.08,
-        ease: "power3.out",
-      });
-    }, el);
+    targets.forEach((el) => {
+      el.style.opacity = "0";
+      el.style.transform = "translateY(24px)";
+      el.style.transition = "opacity 0.6s ease, transform 0.6s ease";
+      observer.observe(el);
+    });
 
-    return () => ctx.revert();
+    return () => observer.disconnect();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps);
 
@@ -43,19 +50,19 @@ export function useCountUp(
     const el = ref.current;
     if (!el) return;
 
-    const ctx = gsap.context(() => {
-      const start = { val: 0 };
-      gsap.to(start, {
-        val: value,
-        duration,
-        ease: "power3.out",
-        onUpdate: () => {
-          el.textContent = Math.round(start.val).toLocaleString();
-        },
-      });
-    }, el);
+    const startTime = performance.now();
+    const startVal = 0;
 
-    return () => ctx.revert();
+    function tick(now: number) {
+      const elapsed = (now - startTime) / 1000;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const current = Math.round(startVal + (value - startVal) * eased);
+      el!.textContent = current.toLocaleString();
+      if (progress < 1) requestAnimationFrame(tick);
+    }
+
+    requestAnimationFrame(tick);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value, duration, ...deps]);
 

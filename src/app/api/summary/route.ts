@@ -18,15 +18,16 @@ export async function GET() {
   if (unauth) return unauth;
   const { rows } = await db.execute(
     `SELECT
-      COALESCE((SELECT SUM(amount) FROM salary_records), 0) AS salaryTotal,
-      COALESCE((SELECT SUM(amount) FROM salary_records WHERE status = 'paid'), 0) AS paidTotal,
-      COALESCE((SELECT SUM(amount) FROM salary_records WHERE status = 'unpaid'), 0) AS unpaidTotal,
-      COALESCE((SELECT SUM(cost) FROM materials), 0) AS materialTotal,
-      COALESCE((SELECT COUNT(*) FROM workers), 0) AS workerCount,
-      COALESCE((SELECT COUNT(*) FROM salary_records), 0) AS recordCount,
-      COALESCE((SELECT COUNT(*) FROM salary_records WHERE status = 'unpaid'), 0) AS unpaidRecordCount,
-      COALESCE((SELECT COUNT(*) FROM materials), 0) AS materialCount,
-      COALESCE((SELECT budget FROM project_settings WHERE id = 1), 0) AS budget`
+      COALESCE(SUM(sr.amount), 0) AS salaryTotal,
+      COALESCE(SUM(CASE WHEN sr.status = 'paid' THEN sr.amount ELSE 0 END), 0) AS paidTotal,
+      COALESCE(SUM(CASE WHEN sr.status = 'unpaid' THEN sr.amount ELSE 0 END), 0) AS unpaidTotal,
+      COUNT(sr.id) AS recordCount,
+      COALESCE(SUM(CASE WHEN sr.status = 'unpaid' THEN 1 ELSE 0 END), 0) AS unpaidRecordCount,
+      (SELECT COUNT(*) FROM workers) AS workerCount,
+      (SELECT COALESCE(SUM(cost), 0) FROM materials) AS materialTotal,
+      (SELECT COUNT(*) FROM materials) AS materialCount,
+      (SELECT COALESCE(budget, 0) FROM project_settings WHERE id = 1) AS budget
+    FROM salary_records sr`
   );
   const totals = rows[0] as unknown as {
     salaryTotal: number;

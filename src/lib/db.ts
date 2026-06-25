@@ -58,7 +58,11 @@ async function initDb() {
     CREATE INDEX IF NOT EXISTS idx_salary_records_worker_id ON salary_records(worker_id);
     CREATE INDEX IF NOT EXISTS idx_salary_records_status ON salary_records(status);
     CREATE INDEX IF NOT EXISTS idx_salary_records_week_start ON salary_records(week_start);
+    CREATE INDEX IF NOT EXISTS idx_salary_records_worker_week ON salary_records(worker_id, week_start DESC);
+    CREATE INDEX IF NOT EXISTS idx_salary_records_status_week ON salary_records(status, week_start DESC);
     CREATE INDEX IF NOT EXISTS idx_materials_date ON materials(date);
+    CREATE INDEX IF NOT EXISTS idx_materials_category ON materials(category);
+    CREATE INDEX IF NOT EXISTS idx_materials_date_id ON materials(date DESC, id DESC);
 
     CREATE TABLE IF NOT EXISTS notification_log (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
